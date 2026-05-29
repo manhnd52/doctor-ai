@@ -84,7 +84,6 @@ def pipeline_context():
             pass
 
     pipeline_path = os.getenv("PIPELINE_PATH")
-    print(pipeline_path)
     if not pipeline_path:
         pipeline_path = os.path.abspath(os.path.join(current_dir, "../../../pipeline"))
     else:

@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import { chatService } from "../services/chatService"
 import type { ChatSession } from "../types/ChatType"
-import type { Message } from "../components/MessageItem"
+import type { Message, PipelineRun } from "../components/MessageItem"
 
 export function getStepDisplayName(stepName: string): string {
   const mapping: Record<string, string> = {
@@ -26,6 +26,7 @@ interface SessionState {
   streamingQuestionType: "PIPELINE" | "LLM" | null
   streamingError: string | null
   streamingRunningStep: string | null
+  streamingPipelineRun: PipelineRun | null
 }
 
 interface ChatState {
@@ -39,6 +40,7 @@ interface ChatState {
   streamingQuestionType: "PIPELINE" | "LLM" | null
   streamingError: string | null
   streamingRunningStep: string | null
+  streamingPipelineRun: PipelineRun | null
   abortControllers: Record<number, AbortController>
 
   loadSessions: () => Promise<void>
@@ -68,6 +70,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   streamingQuestionType: null,
   streamingError: null,
   streamingRunningStep: null,
+  streamingPipelineRun: null,
   abortControllers: {},
 
   setSessionState: (sessionId, updates) => {
@@ -79,6 +82,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       streamingQuestionType: null,
       streamingError: null,
       streamingRunningStep: null,
+      streamingPipelineRun: null,
     }
 
     const resolvedUpdates = typeof updates === "function" ? updates(prevState) : updates
@@ -118,6 +122,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     streamingQuestionType: null,
     streamingError: null,
     streamingRunningStep: null,
+    streamingPipelineRun: null,
   }),
 
   loadSessions: async () => {
@@ -145,6 +150,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       streamingQuestionType: null,
       streamingError: null,
       streamingRunningStep: null,
+      streamingPipelineRun: null,
     }
 
     set({
@@ -155,6 +161,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       streamingQuestionType: sessionState.streamingQuestionType,
       streamingError: sessionState.streamingError,
       streamingRunningStep: sessionState.streamingRunningStep,
+      streamingPipelineRun: sessionState.streamingPipelineRun,
       sessionStates: {
         ...currentStates,
         [id]: sessionState,
@@ -200,6 +207,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
             streamingQuestionType: null,
             streamingError: null,
             streamingRunningStep: null,
+            streamingPipelineRun: null,
           } : {})
         }
       })
@@ -241,12 +249,24 @@ export const useChatStore = create<ChatState>((set, get) => ({
       isAborted = true
     })
 
+    const initialPipelineRun: PipelineRun = {
+      id: -1,
+      question: content,
+      query: "",
+      status: "running",
+      trace_data: {
+        steps: [],
+        question_type: undefined,
+      }
+    }
+
     get().setSessionState(sessionId, {
       sending_message: true,
       streamingMessage: "Thinking...",
       streamingQuestionType: null,
       streamingError: null,
-      streamingRunningStep: null
+      streamingRunningStep: null,
+      streamingPipelineRun: initialPipelineRun
     })
 
     const tempUserMsg: Message = {
@@ -275,30 +295,123 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
         if (eventType === "CLASSIFY") {
           const qType = data.question_type
-          get().setSessionState(sessionId, {
-            streamingQuestionType: qType,
-            streamingMessage: qType === "LLM"
-              ? "General conversation detected..."
-              : "Running analysis pipeline..."
+          get().setSessionState(sessionId, (prev) => {
+            const nextRun = prev.streamingPipelineRun ? {
+              ...prev.streamingPipelineRun,
+              trace_data: {
+                ...prev.streamingPipelineRun.trace_data,
+                question_type: qType
+              }
+            } : null
+            return {
+              streamingQuestionType: qType,
+              streamingMessage: qType === "LLM"
+                ? "General conversation detected..."
+                : "Running analysis pipeline...",
+              streamingPipelineRun: nextRun
+            }
           })
           console.log("Question type set to: ", qType)
         } else if (eventType === "RUNNING") {
           const stepName = data.running_step
-          get().setSessionState(sessionId, {
-            streamingRunningStep: stepName,
-            streamingMessage: `Starting step: ${getStepDisplayName(stepName)}...`
+          get().setSessionState(sessionId, (prev) => {
+            const currentRun = prev.streamingPipelineRun
+            let nextRun = null
+            if (currentRun) {
+              const updatedSteps = [...(currentRun.trace_data?.steps || [])]
+              const existingIndex = updatedSteps.findLastIndex(s => s.name === stepName && s.status !== "completed")
+              if (existingIndex !== -1) {
+                updatedSteps[existingIndex] = {
+                  ...updatedSteps[existingIndex],
+                  status: "doing"
+                }
+              } else {
+                updatedSteps.push({
+                  name: stepName,
+                  status: "doing"
+                })
+              }
+              nextRun = {
+                ...currentRun,
+                trace_data: {
+                  ...currentRun.trace_data,
+                  steps: updatedSteps
+                }
+              }
+            }
+            return {
+              streamingRunningStep: stepName,
+              streamingMessage: `Starting step: ${getStepDisplayName(stepName)}...`,
+              streamingPipelineRun: nextRun
+            }
           })
         } else if (eventType === "STEP") {
           const stepName = data.step
-          get().setSessionState(sessionId, {
-            streamingMessage: `Finished step: ${getStepDisplayName(stepName)} in ${data.time}ms.`
+          get().setSessionState(sessionId, (prev) => {
+            const currentRun = prev.streamingPipelineRun
+            let nextRun = null
+            if (currentRun) {
+              const updatedSteps = [...(currentRun.trace_data?.steps || [])]
+              const existingIndex = updatedSteps.findLastIndex(s => s.name === stepName && s.status !== "completed")
+              if (existingIndex !== -1) {
+                updatedSteps[existingIndex] = {
+                  ...updatedSteps[existingIndex],
+                  status: "completed",
+                  duration_ms: data.time,
+                  details: typeof data.output === "object" ? JSON.stringify(data.output, null, 2) : String(data.output)
+                }
+              } else {
+                updatedSteps.push({
+                  name: stepName,
+                  status: "completed",
+                  duration_ms: data.time,
+                  details: typeof data.output === "object" ? JSON.stringify(data.output, null, 2) : String(data.output)
+                })
+              }
+              nextRun = {
+                ...currentRun,
+                trace_data: {
+                  ...currentRun.trace_data,
+                  steps: updatedSteps
+                }
+              }
+            }
+            return {
+              streamingMessage: `Finished step: ${getStepDisplayName(stepName)} in ${data.time}ms.`,
+              streamingPipelineRun: nextRun
+            }
           })
         } else if (eventType === "ERROR") {
-          get().setSessionState(sessionId, {
-            streamingError: data.error,
-            streamingMessage: null
+          get().setSessionState(sessionId, (prev) => {
+            const currentRun = prev.streamingPipelineRun
+            let nextRun = null
+            if (currentRun) {
+              nextRun = {
+                ...currentRun,
+                status: "failed"
+              }
+            }
+            return {
+              streamingError: data.error,
+              streamingMessage: null,
+              streamingPipelineRun: nextRun
+            }
           })
           console.log("Error:", typeof data)
+        } else if (eventType === "RESULT") {
+          get().setSessionState(sessionId, (prev) => {
+            const currentRun = prev.streamingPipelineRun
+            let nextRun = null
+            if (currentRun) {
+              nextRun = {
+                ...currentRun,
+                status: "completed"
+              }
+            }
+            return {
+              streamingPipelineRun: nextRun
+            }
+          })
         }
 
         // Wait for 1 second if this is an intermediate event

@@ -43,6 +43,7 @@ def get_schema():
         {rel["type"] for rel in schema.get("relationships", [])}
     )
 
+    os.makedirs(os.path.dirname(cache_file), exist_ok=True)
     with open(cache_file, "w") as f:
         json.dump(schema, f)
 
@@ -59,6 +60,7 @@ def get_formatted_schema(get_new: bool = False) -> str:
     
     graph = get_graph()
     schema = graph.schema
+    os.makedirs(os.path.dirname(cache_file), exist_ok=True)
     with open(cache_file, "w") as f:
         f.write(schema)
     return schema

@@ -23,6 +23,7 @@ export default function Chatbot() {
     streamingMessage,
     streamingQuestionType,
     streamingError,
+    streamingPipelineRun,
     loadSessions,
     sendMessage,
     stopSendMessage,
@@ -153,10 +154,13 @@ export default function Chatbot() {
 
                   {streamingQuestionType === "PIPELINE" && !streamingError && (
                     <div className="pt-2">
-                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-accent/10 px-2.5 py-1 text-xs font-semibold text-accent border border-accent/20">
+                      <button
+                        onClick={() => setInspectorOpen(true)}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-accent/10 hover:bg-accent/20 px-2.5 py-1 text-xs font-semibold text-accent border border-accent/20 transition cursor-pointer active:scale-95"
+                      >
                         <Layers className="h-3 w-3" />
                         Pipeline Active
-                      </span>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -180,9 +184,9 @@ export default function Chatbot() {
       </div>
 
       {/* 3. Right Sidebar (Inspector) */}
-      {isInspectorOpen && selectedPipelineRun && (
+      {isInspectorOpen && (selectedPipelineRun || (sending_message && streamingPipelineRun)) && (
         <Inspector
-          pipelineRun={selectedPipelineRun}
+          pipelineRun={sending_message && streamingPipelineRun ? streamingPipelineRun : selectedPipelineRun}
           onClose={() => setInspectorOpen(false)}
         />
       )}
