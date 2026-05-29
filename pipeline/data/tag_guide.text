@@ -1,0 +1,115 @@
+# QUESTION TAG SET (FOR BIOMEDICAL KG)
+
+## 1. Core Question Types
+
+- retrieval_basic  
+  Direct 1-hop lookup
+
+- clinical_practical  
+  Real-world medical usage (treatment, symptoms, contraindications)
+
+- biological_mechanism  
+  Pathway / process / molecular-level questions
+
+- reasoning_multihop  
+  2–3 hop reasoning across entities
+
+- constraint_filter  
+  Questions with filtering conditions (approval, properties, etc.)
+
+- hypothesis_discovery  
+  Exploratory / potential / indirect relationships
+
+---
+
+## 2. Aggregation Types
+
+- aggregation_count  
+  Counting (how many)
+
+- aggregation_rank  
+  Ranking (most, least)
+
+- aggregation_compare  
+  Comparison between entities
+
+- aggregation_stat  
+  Average, distribution, statistics
+
+- aggregation_extreme  
+  Max / min queries
+
+- aggregation_conditional  
+  Aggregation with constraints
+
+---
+
+## 3. Entity Focus Tags
+
+- entity_disease  
+- entity_drug  
+- entity_gene  
+- entity_exposure  
+- entity_phenotype  
+- entity_pathway  
+- entity_process  
+- entity_function  
+- entity_anatomy  
+
+(Multiple allowed)
+
+---
+
+## 4. Intent Tags (Very Important for realism)
+
+- intent_lookup  
+- intent_explanation  
+- intent_clinical_decision  
+- intent_mechanism  
+- intent_risk_analysis  
+- intent_drug_discovery  
+
+---
+
+## 5. Complexity Tags
+
+- hop_1  
+- hop_2  
+- hop_3  
+
+---
+
+## 6. Quality Control Tags (for filtering)
+
+- valid_realistic  
+- invalid_unrealistic  
+- invalid_cross_domain  
+- invalid_overcomplex  
+
+---
+
+## 7. Optional Fine-grained Tags
+
+- drug_safety  
+- drug_interaction  
+- gene_expression  
+- disease_diagnosis  
+- disease_treatment  
+- exposure_risk  
+
+---
+
+## Example Annotation
+
+Question:
+"Which approved drugs treat disease X but do not cause phenotype Y?"
+
+Tags:
+- constraint_filter  
+- aggregation_conditional  
+- entity_disease  
+- entity_drug  
+- entity_phenotype  
+- intent_clinical_decision  
+- hop_2  
+- valid_realistic

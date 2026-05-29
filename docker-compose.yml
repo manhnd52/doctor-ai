@@ -1,0 +1,96 @@
+name: chatbot
+
+services:
+  neo4j:
+    build:
+      context: ./neo4j
+    container_name: neo4j
+    ports:
+      - "7474:7474" # HTTP
+      - "7687:7687" # Bolt
+    environment:
+      NEO4J_AUTH: neo4j/12345678
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/logs:/logs
+      - ./neo4j/backup:/backup:ro
+      - ./neo4j/init:/var/lib/neo4j/import/init
+      - ./neo4j/conf:/var/lib/neo4j/conf
+      - ./neo4j/start.sh:/start.sh:ro
+      - neo4j_plugins:/plugins
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p 12345678 'RETURN 1' >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 15s
+      retries: 30
+      start_period: 60s
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./neo4j/conf
+          target: /var/lib/neo4j/conf
+        - action: sync+restart
+          path: ./neo4j/init
+          target: /var/lib/neo4j/import/init
+        - action: sync+restart
+          path: ./neo4j/start.sh
+          target: /start.sh
+
+  backend:
+    build:
+      context: ./backend
+    container_name: backend
+    ports:
+      - "8000:8000"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: 12345678
+      NEO4J_DATABASE: neo4j
+      PIPELINE_PATH: /pipeline
+    volumes:
+      - ./backend:/app
+      - /app/venv
+      - ./pipeline:/pipeline
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /app
+          ignore:
+            - venv/
+            - chatbot.db
+        - action: rebuild
+          path: ./backend/requirements.txt
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./frontend/package.json
+
+volumes:
+  neo4j_plugins: {}
+

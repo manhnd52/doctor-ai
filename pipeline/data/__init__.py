@@ -1,0 +1,1 @@
+from .primekg_predicate_descriptions import PREDICATE_DESCRIPTIONS as predicate_descriptions
