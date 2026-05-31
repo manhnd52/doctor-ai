@@ -1,0 +1,135 @@
+Node properties:
+- **disease**
+  - `id`: STRING Example: "13924_12592_14672_13460_12591_12536_30861_8146_814"
+  - `name`: STRING Example: "osteogenesis imperfecta"
+  - `source`: STRING Example: "mondo_grouped"
+  - `prevalence`: STRING Example: "<1/1000000"
+  - `epidemiology`: STRING Example: "The overall prevalence of OI is estimated at betwe"
+  - `management_and_treatment`: STRING Example: "Management should be multidisciplinary involving e"
+  - `causes`: STRING Example: "no information available"
+  - `risk_factors`: STRING Example: "no information available"
+  - `complications`: STRING Example: "no information available"
+  - `prevention`: STRING Example: "no information available"
+  - `when_to_see_a_doctor`: STRING Example: "no information available"
+  - `description`: STRING Example: "There are three subtypes of OI type II (A, B and C"
+  - `index`: INTEGER Example: "27158"
+- **exposure**
+  - `id`: STRING Example: "c092102"
+  - `name`: STRING Example: "1-hydroxyphenanthrene"
+  - `source`: STRING Available options: ['ctd']
+  - `index`: INTEGER Min: 61677, Max: 127597
+- **anatomy**
+  - `id`: STRING Example: "2701"
+  - `name`: STRING Example: "anterior median oculomotor nucleus"
+  - `source`: STRING Example: "uberon"
+  - `index`: INTEGER Example: "65112"
+- **biological_process**
+  - `id`: STRING Example: "43943"
+  - `name`: STRING Example: "regulation of asexual sporulation resulting in for"
+  - `source`: STRING Example: "go"
+  - `index`: INTEGER Example: "43898"
+- **approval_status**
+  - `name`: STRING Available options: ['approved', 'investigational', 'vet_approved', 'experimental', 'withdrawn', 'nutraceutical', 'illicit']
+  - `index`: INTEGER Min: 320437, Max: 320443
+- **pathway**
+  - `id`: STRING Example: "r-hsa-6811440"
+  - `name`: STRING Example: "retrograde transport at the trans-golgi-network"
+  - `source`: STRING Available options: ['reactome']
+  - `index`: INTEGER Min: 62337, Max: 129371
+- **effect_or_phenotype**
+  - `id`: STRING Example: "6155"
+  - `name`: STRING Example: "long phalanx of finger"
+  - `source`: STRING Example: "hpo"
+  - `index`: INTEGER Example: "24117"
+- **cellular_component**
+  - `id`: STRING Example: "110165"
+  - `name`: STRING Example: "cellular anatomical entity"
+  - `source`: STRING Available options: ['go']
+  - `index`: INTEGER Min: 55515, Max: 127434
+- **category**
+  - `name`: STRING Example: "Copper-containing Intrauterine Device"
+  - `index`: INTEGER Min: 316676, Max: 320436
+- **gene_or_protein**
+  - `id`: STRING Example: "10273"
+  - `name`: STRING Example: "stub1"
+  - `source`: STRING Example: "ncbi"
+  - `index`: INTEGER Example: "1000"
+- **molecular_function**
+  - `id`: STRING Example: "8168"
+  - `name`: STRING Example: "methyltransferase activity"
+  - `source`: STRING Example: "go"
+  - `index`: INTEGER Example: "53517"
+- **drug**
+  - `id`: STRING Example: "db02067"
+  - `name`: STRING Example: "triglu-5-formyl-tetrahydrofolate"
+  - `source`: STRING Available options: ['drugbank']
+  - `description`: STRING Example: "no information available"
+  - `half_life`: STRING Example: "no information available"
+  - `mechanism_of_action`: STRING Example: "no information available"
+  - `pharmacodynamics`: STRING Example: "no information available"
+  - `aggregate_state`: STRING Available options: ['solid', 'no information available', 'liquid', 'gas']
+  - `index`: INTEGER Min: 14012, Max: 39897
+  - `molecular_weight`: FLOAT Min: 16.03, Max: 36404.45
+  - `tpsa`: FLOAT Min: 3.24, Max: 12082.97
+  - `clogp`: FLOAT Min: -12.6, Max: 20.43
+Relationship properties:
+
+The relationships:
+(:disease)-[:phenotype_present]->(:effect_or_phenotype)
+(:disease)-[:associated_with]->(:gene_or_protein)
+(:disease)-[:parent_child]->(:disease)
+(:disease)-[:phenotype_absent]->(:effect_or_phenotype)
+(:disease)-[:linked_to]->(:exposure)
+(:disease)-[:indication]->(:drug)
+(:disease)-[:contraindication]->(:drug)
+(:disease)-[:off_label_use]->(:drug)
+(:exposure)-[:interacts_with]->(:gene_or_protein)
+(:exposure)-[:interacts_with]->(:biological_process)
+(:exposure)-[:interacts_with]->(:cellular_component)
+(:exposure)-[:interacts_with]->(:molecular_function)
+(:exposure)-[:parent_child]->(:exposure)
+(:exposure)-[:linked_to]->(:disease)
+(:anatomy)-[:parent_child]->(:anatomy)
+(:anatomy)-[:expression_absent]->(:gene_or_protein)
+(:anatomy)-[:expression_present]->(:gene_or_protein)
+(:biological_process)-[:parent_child]->(:biological_process)
+(:biological_process)-[:interacts_with]->(:gene_or_protein)
+(:biological_process)-[:interacts_with]->(:exposure)
+(:pathway)-[:interacts_with]->(:gene_or_protein)
+(:pathway)-[:parent_child]->(:pathway)
+(:effect_or_phenotype)-[:parent_child]->(:effect_or_phenotype)
+(:effect_or_phenotype)-[:phenotype_present]->(:disease)
+(:effect_or_phenotype)-[:phenotype_absent]->(:disease)
+(:effect_or_phenotype)-[:side_effect]->(:drug)
+(:effect_or_phenotype)-[:associated_with]->(:gene_or_protein)
+(:cellular_component)-[:parent_child]->(:cellular_component)
+(:cellular_component)-[:interacts_with]->(:gene_or_protein)
+(:cellular_component)-[:interacts_with]->(:exposure)
+(:gene_or_protein)-[:ppi]->(:gene_or_protein)
+(:gene_or_protein)-[:expression_absent]->(:anatomy)
+(:gene_or_protein)-[:expression_present]->(:anatomy)
+(:gene_or_protein)-[:interacts_with]->(:pathway)
+(:gene_or_protein)-[:interacts_with]->(:biological_process)
+(:gene_or_protein)-[:interacts_with]->(:cellular_component)
+(:gene_or_protein)-[:interacts_with]->(:molecular_function)
+(:gene_or_protein)-[:interacts_with]->(:exposure)
+(:gene_or_protein)-[:associated_with]->(:disease)
+(:gene_or_protein)-[:associated_with]->(:effect_or_phenotype)
+(:gene_or_protein)-[:target]->(:drug)
+(:gene_or_protein)-[:enzyme]->(:drug)
+(:gene_or_protein)-[:transporter]->(:drug)
+(:gene_or_protein)-[:carrier]->(:drug)
+(:molecular_function)-[:interacts_with]->(:gene_or_protein)
+(:molecular_function)-[:interacts_with]->(:exposure)
+(:molecular_function)-[:parent_child]->(:molecular_function)
+(:drug)-[:has]->(:approval_status)
+(:drug)-[:target]->(:gene_or_protein)
+(:drug)-[:is_a]->(:category)
+(:drug)-[:indication]->(:disease)
+(:drug)-[:contraindication]->(:disease)
+(:drug)-[:synergistic_interaction]->(:drug)
+(:drug)-[:transporter]->(:gene_or_protein)
+(:drug)-[:enzyme]->(:gene_or_protein)
+(:drug)-[:carrier]->(:gene_or_protein)
+(:drug)-[:side_effect]->(:effect_or_phenotype)
+(:drug)-[:off_label_use]->(:disease)

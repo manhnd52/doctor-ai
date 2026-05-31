@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.auth.models import User
 from app.auth.utils import decode_access_token
 from app.database import get_db
+from app.auth.constants import UserRole
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
@@ -33,3 +34,15 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         )
 
     return user
+
+
+async def require_admin(
+    current_user=Depends(get_current_user)
+):
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This API is only for admin!"
+        )
+
+    return current_user

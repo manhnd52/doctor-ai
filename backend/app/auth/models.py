@@ -1,6 +1,7 @@
-from sqlalchemy import Boolean, Integer, String
+from sqlalchemy import Boolean, Integer, String, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
+from app.auth.constants import UserRole
 import app.chat.models
 from typing import TYPE_CHECKING
 
@@ -14,5 +15,6 @@ class User(Base):
     username: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.USER, nullable=False)
     
     chat_sessions: Mapped[list["ChatSession"]] = relationship("ChatSession", back_populates="user")

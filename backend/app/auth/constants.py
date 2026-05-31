@@ -1,9 +1,15 @@
 import os
+from enum import Enum
 
 
 class ErrorCode:
     INVALID_CREDENTIALS = "INVALID_CREDENTIALS"
     USER_INACTIVE = "USER_INACTIVE"
+
+
+class UserRole(str, Enum):
+    USER = "User"
+    ADMIN = "Admin"
 
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "please-change-this-secret")

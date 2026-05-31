@@ -2,7 +2,7 @@ import { create } from "zustand"
 import { authService } from "../services/authService"
 
 interface UserState {
-  user: { username: string } | null
+  user: { username: string; role?: string } | null
   token: string | null
   loading: boolean
   error: string | null

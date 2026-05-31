@@ -27,4 +27,4 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
 
 @router.get("/me")
 def read_current_user(current_user = Depends(get_current_user)):
-    return {"username": current_user.username}
+    return {"username": current_user.username, "role": current_user.role}

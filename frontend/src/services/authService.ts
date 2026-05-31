@@ -2,6 +2,7 @@ import { api } from "."
 
 export interface UserMeResponse {
   username: string
+  role?: string
 }
 
 export interface LoginResponse {
