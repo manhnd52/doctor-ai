@@ -1,15 +1,23 @@
 import { Outlet } from "react-router-dom"
 import Header from "../components/Header"
+import Sidebar from "../components/Sidebar"
+import { useUIStore } from "../store/uiStore"
 
 export default function MainLayout() {
-  return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-primary font-sans antialiased text-primary">
-      {/* Top Header */}
-      <Header />
+  const { isSidebarOpen } = useUIStore()
 
-      {/* Main Workspace (Takes full remaining space) */}
-      <div className="flex flex-1 min-h-0 overflow-hidden relative">
-        <main className="flex-grow h-full w-full">
+  return (
+    <div className="flex h-screen w-screen overflow-hidden bg-primary font-sans antialiased text-primary">
+      {/* Left Sidebar */}
+      {isSidebarOpen && <Sidebar />}
+
+      {/* Right Content Area (Header + Main Page Content) */}
+      <div className="flex flex-col flex-1 min-w-0 h-full overflow-hidden relative">
+        {/* Top Header */}
+        <Header />
+
+        {/* Main Workspace */}
+        <main className="flex-grow h-full w-full relative overflow-hidden">
           <Outlet />
         </main>
       </div>

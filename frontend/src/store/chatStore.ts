@@ -45,12 +45,11 @@ interface ChatState {
 
   loadSessions: () => Promise<void>
   selectSession: (id: number) => Promise<void>
-  createSession: () => Promise<ChatSession | null>
+  createSession: (title: string, knowledgeGraphId: number) => Promise<ChatSession | null>
   deleteSession: (id: number) => Promise<void>
   updateSessionTitle: (id: number, title: string) => Promise<void>
   sendMessage: (content: string, customSessionId?: number) => Promise<void>
   stopSendMessage: (customSessionId?: number) => void
-  suggestionClick: (prompt: string) => Promise<void>
   clearActiveSession: () => void
   setStreamingMessage: (msg: string | null) => void
   setSessionState: (
@@ -176,10 +175,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
-  createSession: async () => {
+  createSession: async (title: string = "", knowledgeGraphId: number) => {
     try {
-      const title = `Chat ${get().sessions.length + 1}`
-      const newSession = await chatService.createSession(title)
+      const sessionTitle = title ? title : `Chat ${get().sessions.length + 1}`
+      const newSession = await chatService.createSession(sessionTitle, knowledgeGraphId)
       set((state) => ({ sessions: [newSession, ...state.sessions] }))
       get().selectSession(newSession.id)
       return newSession
@@ -475,23 +474,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const controller = get().abortControllers[sessionId]
     if (controller) {
       controller.abort()
-    }
-  },
-
-  suggestionClick: async (prompt) => {
-    try {
-      let targetSessionId = get().activeSessionId
-      if (!targetSessionId) {
-        const newSession = await get().createSession()
-        if (newSession) {
-          targetSessionId = newSession.id
-        }
-      }
-      if (targetSessionId) {
-        await get().sendMessage(prompt, targetSessionId)
-      }
-    } catch (err) {
-      console.error("Failed to send suggestion:", err)
     }
   }
 }))

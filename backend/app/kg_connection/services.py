@@ -12,6 +12,10 @@ def get_knowledge_graphs(db: Session):
     """Retrieve all knowledge graphs"""
     return db.query(KnowledgeGraph).all()
 
+def get_active_knowledge_graph(db: Session):
+    """Retrieve all active (aka available) knowledge graphs"""
+    return db.query(KnowledgeGraph).filter(KnowledgeGraph.is_active == True).all()
+
 def create_knowledge_graph(db: Session, request: CreateKnowledgeGraphRequest):
     """Create a new knowledge graph"""
     kg = KnowledgeGraph(

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
-import Sidebar from "../components/Sidebar"
 import MessageList from "../components/MessageList"
+import KnowledgeGraphSelector from "../components/KnowledgeGraphSelector"
 import type { Message, PipelineRun } from "../components/MessageItem"
 import InputBox from "../components/InputBox"
 import Inspector from "../components/Inspector"
@@ -8,7 +8,7 @@ import { ensureAuthenticated } from "../services"
 import { useUIStore } from "../store/uiStore"
 import { useChatStore } from "../store/chatStore"
 import { useConnectionStore } from "../store/connectionStore"
-import { AlertCircle, Loader2, Layers } from "lucide-react"
+import { AlertCircle, Loader2, Layers, Database } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 export default function Chatbot() {
@@ -27,14 +27,15 @@ export default function Chatbot() {
     loadSessions,
     sendMessage,
     stopSendMessage,
-    suggestionClick,
+    sessions,
   } = useChatStore()
 
   const {
-    isSidebarOpen,
     isInspectorOpen,
     setInspectorOpen,
     setHasPipelineRun,
+    isGraphSelectorOpen,
+    setGraphSelectorOpen,
   } = useUIStore()
 
   const { fetchCurrentConnection } = useConnectionStore()
@@ -44,6 +45,13 @@ export default function Chatbot() {
   useEffect(() => {
     setHasPipelineRun(!!selectedPipelineRun)
   }, [selectedPipelineRun, setHasPipelineRun])
+
+  // Open selector modal by default if there are no chat sessions
+  useEffect(() => {
+    if (!pageLoading && sessions.length === 0) {
+      setGraphSelectorOpen(true)
+    }
+  }, [pageLoading, sessions.length, setGraphSelectorOpen])
 
   // 1. Initial Authentication
   useEffect(() => {
@@ -110,22 +118,40 @@ export default function Chatbot() {
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-primary font-sans">
-      {/* 1. Left Sidebar */}
-      {isSidebarOpen && <Sidebar />}
-
-      {/* 2. Main Chat Area */}
+      {/* Main Chat Area */}
       <div className="flex-1 flex flex-col h-full relative overflow-hidden bg-primary/30">
         {/* Message Viewport */}
         <div className="flex-grow flex flex-col min-h-0 overflow-y-auto">
-          <MessageList
-            messages={messages}
-            onSelectPipelineRun={(run) => {
-              setSelectedPipelineRun(run)
-              setInspectorOpen(true)
-            }}
-            selectedPipelineRunId={selectedPipelineRun?.id || null}
-            onSuggestionClick={suggestionClick}
-          />
+          {activeSessionId ? (
+            <MessageList
+              messages={messages}
+              onSelectPipelineRun={(run) => {
+                setSelectedPipelineRun(run)
+                setInspectorOpen(true)
+              }}
+              selectedPipelineRunId={selectedPipelineRun?.id || null}
+            />
+          ) : (
+            <div className="flex-grow flex flex-col items-center justify-center p-8 select-none bg-primary/45 h-full">
+              <div className="w-full max-w-[640px] text-center space-y-6 my-auto">
+                <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-soft border border-accent/20 text-accent">
+                  <Database className="h-8 w-8" />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-bold text-primary">AI Research Workbench</h2>
+                  <p className="text-sm text-secondary max-w-sm mx-auto">
+                    Select a chat session from the sidebar or create a new chat to begin exploring.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setGraphSelectorOpen(true)}
+                  className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-black hover:brightness-110 active:scale-97 transition cursor-pointer"
+                >
+                  Create New Chat
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Streaming Indicator */}
           {sending_message && (streamingMessage || streamingError) && (
@@ -170,17 +196,19 @@ export default function Chatbot() {
         </div>
 
         {/* Input Box */}
-        <InputBox
-          onSendMessage={sendMessage}
-          onStopSendMessage={stopSendMessage}
-          isSending={sending_message}
-          disabled={!activeSessionId}
-          placeholder={
-            !activeSessionId
-              ? "Select or create a chat to begin..."
-              : "Type a medical question or ask about Neo4j graph..."
-          }
-        />
+        {activeSessionId && (
+          <InputBox
+            onSendMessage={sendMessage}
+            onStopSendMessage={stopSendMessage}
+            isSending={sending_message}
+            disabled={!activeSessionId}
+            placeholder={
+              !activeSessionId
+                ? "Select or create a chat to begin..."
+                : "Type a medical question or ask about Neo4j graph..."
+            }
+          />
+        )}
       </div>
 
       {/* 3. Right Sidebar (Inspector) */}
@@ -190,6 +218,9 @@ export default function Chatbot() {
           onClose={() => setInspectorOpen(false)}
         />
       )}
+
+      {/* Selector Modal */}
+      {isGraphSelectorOpen && <KnowledgeGraphSelector />}
     </div>
   )
 }

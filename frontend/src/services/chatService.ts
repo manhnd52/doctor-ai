@@ -1,5 +1,5 @@
 import { api } from "."
-import type { ChatSession } from "../types/ChatType"
+import type { ChatSession, KnowledgeGraph } from "../types/ChatType"
 import type { Message } from "../components/MessageItem"
 
 export const chatService = {
@@ -13,8 +13,16 @@ export const chatService = {
     return res.data
   },
 
-  async createSession(title: string): Promise<ChatSession> {
-    const res = await api.post<ChatSession>("/chat/sessions", { title })
+  async getKnowledgeGraphs(): Promise<KnowledgeGraph[]> {
+    const res = await api.get<KnowledgeGraph[]>("/knowledge-graphs")
+    return res.data
+  },
+
+  async createSession(title: string, knowledgeGraphId: number): Promise<ChatSession> {
+    const res = await api.post<ChatSession>("/chat/sessions", { 
+      title, 
+      knowledge_graph_id: knowledgeGraphId 
+    })
     return res.data
   },
 

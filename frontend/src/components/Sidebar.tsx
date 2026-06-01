@@ -1,17 +1,20 @@
 import { useState } from "react"
 import { Plus, Search, MessageSquare, Trash2, Edit3, Check, X } from "lucide-react"
 import { useChatStore } from "../store/chatStore"
+import { useUIStore } from "../store/uiStore"
 import type { ChatSession } from "../types/ChatType"
+import chatbotLogo from "../assets/chatbot-ai.jpeg"
 
 export default function Sidebar() {
   const {
     sessions,
     activeSessionId,
     selectSession,
-    createSession,
     deleteSession,
     updateSessionTitle,
   } = useChatStore()
+
+  const { setGraphSelectorOpen } = useUIStore()
 
   const [searchTerm, setSearchTerm] = useState("")
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -42,10 +45,20 @@ export default function Sidebar() {
 
   return (
     <div className="flex h-full w-[260px] flex-col border-r border-theme bg-panel text-primary select-none sm:w-[280px]">
+      {/* Logo & Branding */}
+      <div className="flex items-center gap-3 px-5 py-4 mb-2">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden shadow-sm">
+          <img src={chatbotLogo} alt="Chatbot Logo" className="h-full w-full object-cover" />
+        </div>
+        <span className="font-semibold text-sm tracking-[0.18em] text-primary">
+          Doctor.ai
+        </span>
+      </div>
+
       {/* New Chat Button */}
-      <div className="p-4">
+      <div className="px-4 pb-2">
         <button
-          onClick={() => createSession()}
+          onClick={() => setGraphSelectorOpen(true)}
           className="flex w-full items-center justify-center gap-2 rounded-xl border border-theme bg-primary py-3 text-sm font-medium transition hover:bg-secondary active:scale-[0.98] cursor-pointer"
         >
           <Plus className="h-4 w-4" />

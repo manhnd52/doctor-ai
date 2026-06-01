@@ -14,11 +14,18 @@ router = APIRouter(prefix="/knowledge-graphs", tags=["kg"])
 
 @router.get("/")
 def get_knowledge_graphs(
-    current_user: User = Depends(require_admin),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Get the list of knowledge graphs"""
-    return services.get_knowledge_graphs(db=db)
+    """
+    Depend on the role of the request:
+    - If the request is from an admin, return all knowledge graphs
+    - If the request is from a user, return only active knowledge graphs
+    """
+    if current_user.role == "admin":
+        return services.get_knowledge_graphs(db=db)
+    else: 
+        return services.get_active_knowledge_graph(db=db)
 
 @router.post("/")
 def create_knowledge_graph(

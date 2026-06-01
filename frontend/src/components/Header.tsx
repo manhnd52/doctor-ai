@@ -1,25 +1,18 @@
 import { useState } from "react"
-import { ChevronDown, Check, Menu, Layers, LogOut } from "lucide-react"
+import { Menu, Layers, LogOut } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import DatabaseConnectMenu from "./DatabaseContextMenu"
-import { useConnectionStore } from "../store/connectionStore"
+import KnowledgeContext from "./KnowledgeContext"
 import { useUIStore } from "../store/uiStore"
 import { useUserStore } from "../store/userStore"
-import chatbotLogo from "../assets/chatbot-ai.jpeg"
 
 export default function Header() {
   const [isMenuOpen, setMenuOpen] = useState(false)
-  const [isModelDropdownOpen, setModelDropdownOpen] = useState(false)
-  const { status } = useConnectionStore()
-  const isConnected = status?.success === true
 
   const {
     isSidebarOpen,
     toggleSidebar,
     isInspectorOpen,
     toggleInspector,
-    selectedModel,
-    setSelectedModel,
     hasPipelineRun,
   } = useUIStore()
 
@@ -38,30 +31,21 @@ export default function Header() {
           >
             <Menu className="h-5 w-5" />
           </button>
-
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden shadow-sm">
-              <img src={chatbotLogo} alt="Chatbot Logo" className="h-full w-full object-cover" />
-            </div>
-            <span className="font-semibold text-sm tracking-[0.18em] text-primary hidden sm:inline">
-              DOCTOR AI CHATBOT
-            </span>
-          </div>
         </div>
 
         {/* Right Side: Model dropdown, DB status, and Inspector toggle */}
         <div className="flex items-center gap-3">
-          {/* Database Connection Button */}
+          {/* Knowledge Graph Show Context Button */}
           <button
             type="button"
             onClick={() => setMenuOpen(true)}
             className="flex items-center gap-2 rounded-xl border border-theme bg-secondary px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/95 active:scale-97"
           >
             <span
-              className={`h-2 w-2 rounded-full ${isConnected ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-neutral-400"
+              className={`h-2 w-2 rounded-full ${"bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
                 }`}
             />
-            <span>{isConnected ? "Connected to DB" : "Connect KG"}</span>
+            <span>Show KG</span>
           </button>
 
           {/* User profile & Logout */}
@@ -100,7 +84,7 @@ export default function Header() {
         </div>
       </header>
 
-      <DatabaseConnectMenu isOpen={isMenuOpen} onClose={() => setMenuOpen(false)} />
+      <KnowledgeContext isOpen={isMenuOpen} onClose={() => setMenuOpen(false)} />
     </>
   )
 }
