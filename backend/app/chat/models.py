@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Optional
 if TYPE_CHECKING:
     from app.auth.models import User
     from app.pipeline_data.models import PipelineRun
+    from app.kg_connection.models import KnowledgeGraph
 
 class ChatSession(Base):
     __tablename__ = "chat_sessions"
@@ -15,9 +16,11 @@ class ChatSession(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column(String, default="New chat", nullable=False)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    kg_id: Mapped[int] = mapped_column(Integer, ForeignKey("knowledge_graphs.id"), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     
     user: Mapped["User"] = relationship("User", back_populates="chat_sessions")
+    knowledge_graph: Mapped["KnowledgeGraph"] = relationship("KnowledgeGraph", back_populates="chat_sessions")
     messages: Mapped[list["ChatMessage"]] = relationship("ChatMessage", back_populates="chat_session", cascade="all, delete-orphan")
 
 

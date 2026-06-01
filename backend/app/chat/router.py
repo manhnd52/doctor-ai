@@ -24,7 +24,12 @@ def create_session(
     db: Session = Depends(get_db),
 ):
     """Create a new chat session, return session_id"""
-    return services.create_chat_session(db=db, title=request.title, user_id=current_user.id)
+    return services.create_chat_session(
+        db=db, 
+        title=request.title, 
+        user_id=current_user.id, 
+        kg_id=request.knowledge_graph_id
+    )
 
 # GET /sessions: Get the list of chat sessions for the user
 @router.get("/sessions", response_model=list[ChatSessionResponse])

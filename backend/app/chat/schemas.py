@@ -21,6 +21,7 @@ class MessageResponse(MessageBase):
 
 class ChatSessionCreate(BaseModel):
     title: str = "New chat"
+    knowledge_graph_id: int
 
 class ChatSessionUpdate(BaseModel):
     title: str
@@ -29,6 +30,7 @@ class ChatSessionResponse(BaseModel):
     id: int
     title: str
     user_id: int
+    kg_id: int
     created_at: datetime
 
     class Config:

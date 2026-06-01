@@ -1,93 +1,163 @@
-from typing import LiteralString, cast
 from sqlalchemy.orm import Session
-from app.auth.models import User
-from app.auth.utils import verify_password, hash_password
-from app.auth.exceptions import InvalidCredentialsException, InactiveUserException
-from app.database import get_db
-from app.database import get_db
-from app.kg_connection.models import KgConnection, Connecting
-from fastapi import Depends
+from fastapi import HTTPException, status
+from app.kg_connection.models import KnowledgeGraph
+from app.kg_connection.schemas import (
+    CreateKnowledgeGraphRequest, 
+    UpdateKnowledgeGraphRequest,
+    QueryRequest
+)
 from app.kg_connection.utils import KGSessionManager
-from neo4j import Query
-"""
-One user have many kg connections, but only one active connection at a time.
-The table Connecting will store the current active connection for each user. 
-When a user connects to a new kg connection, we will update the Connecting table to point to the new connection and set the previous connection as inactive.
-"""
-def add_kg_connection(user: User, uri: str, database_name: str, username: str, password: str, db: Session):
-    new_connection = KgConnection(user_id=user.id, uri=uri, database_name=database_name, username=username, password=password, is_active=True)
 
-    session_manager = KGSessionManager()
-    result = session_manager.validate_connection(new_connection)
-    if not result:
-        db.rollback()
-        raise Exception("Failed to connect to the knowledge graph.")
+def get_knowledge_graphs(db: Session):
+    """Retrieve all knowledge graphs"""
+    return db.query(KnowledgeGraph).all()
+
+def create_knowledge_graph(db: Session, request: CreateKnowledgeGraphRequest):
+    """Create a new knowledge graph"""
+    kg = KnowledgeGraph(
+        name=request.name,
+        description=request.description,
+        uri=request.uri,
+        database_name=request.database_name,
+        username=request.username,
+        password=request.password,
+        is_active=True
+    )
+    # Load db info 
     
-    new_connection.node_count = result['nodeCount']
-    new_connection.relationship_count = result['relationshipCount']
-
-    db.add(new_connection)
+    db.add(kg)
     db.commit()
-    db.refresh(new_connection)
+    db.refresh(kg)
+    return kg
 
-    # Automatically set this connection as active in the Connecting table
-    current_connecting = db.query(Connecting).filter(Connecting.user_id == user.id).first()
-    if current_connecting:
-        current_connecting.kg_connection_id = new_connection.id
-    else:
-        new_connecting = Connecting(user_id=user.id, kg_connection_id=new_connection.id)
-        db.add(new_connecting)
+def update_knowledge_graph(db: Session, id: int, request: UpdateKnowledgeGraphRequest):
+    """Update an existing knowledge graph"""
+    kg = db.query(KnowledgeGraph).filter(KnowledgeGraph.id == id).first()
+    if not kg:
+        raise HTTPException(status_code=404, detail="Knowledge graph not found")
+    
+    if request.name is not None:
+        kg.name = request.name
+    if request.description is not None:
+        kg.description = request.description
+    if request.uri is not None:
+        kg.uri = request.uri
+    if request.database_name is not None:
+        kg.database_name = request.database_name
+    if request.username is not None:
+        kg.username = request.username
+    if request.password is not None:
+        kg.password = request.password
+    if request.is_active is not None:
+        kg.is_active = request.is_active
+        
     db.commit()
+    db.refresh(kg)
+    return kg
 
-    return new_connection
-
-def get_all_connections(user: User, db: Session):
-    connections = db.query(KgConnection).filter(KgConnection.user_id == user.id).all()
-    return connections
-
-def get_current_connection(user: User, db: Session) -> KgConnection | None:
-    connection = db.query(KgConnection).join(
-        Connecting, Connecting.kg_connection_id == KgConnection.id
-    ).filter(
-        Connecting.user_id == user.id
-    ).first()
-    return connection
-
-def connect_to_kg(user: User, kg_connection_id: int, db: Session):
-    connection = db.query(KgConnection).filter(KgConnection.id == kg_connection_id, KgConnection.user_id == user.id).first()
-    if not connection:
-        raise Exception("Connection not found")
-    
-    if not connection.is_active:
-        raise Exception("Connection is inactive")
-
-    session_manager = KGSessionManager()
-    if not session_manager.validate_connection(connection):
-        raise Exception("Failed to connect to the knowledge graph.")
-    
-    current_connecting = db.query(Connecting).filter(Connecting.user_id == user.id).first()
-    if current_connecting:
-        current_connecting.kg_connection_id = kg_connection_id
-    else:
-        new_connecting = Connecting(user_id=user.id, kg_connection_id=kg_connection_id)
-        db.add(new_connecting)
-    
+def delete_knowledge_graph(db: Session, id: int):
+    """Delete a knowledge graph"""
+    kg = db.query(KnowledgeGraph).filter(KnowledgeGraph.id == id).first()
+    if not kg:
+        raise HTTPException(status_code=404, detail="Knowledge graph not found")
+    db.delete(kg)
     db.commit()
-    return connection
+    return {"status": "success", "message": "Knowledge graph deleted successfully"}
 
-def delete_connection(user: User, connection_id: int, db: Session):
-    connection = db.query(KgConnection).filter(KgConnection.id == connection_id, KgConnection.user_id == user.id).first()
-    if connection:
-        db.delete(connection)
+def check_knowledge_graph_connection(db: Session, id: int):
+    """Check Neo4j connection for an existing knowledge graph"""
+    kg = db.query(KnowledgeGraph).filter(KnowledgeGraph.id == id).first()
+    if not kg:
+        raise HTTPException(status_code=404, detail="Knowledge graph not found")
+    
+    manager = KGSessionManager()
+    result = manager.validate_connection(kg)
+    
+    if result is None:
+        return {
+            "status": False,
+            "message": "Failed to connect to Knowledge Graph",
+            "error": "Connection error"
+        }
+    
+    return {
+        "status": True,
+        "node_count": result.get("nodeCount", 0),
+        "relationship_count": result.get("relationshipCount", 0),
+        "message": "Connection check successful"
+    }
+
+def get_schema(db: Session, id: int):
+    """Get the schema of the knowledge graph and cache it in the database"""
+    kg = db.query(KnowledgeGraph).filter(KnowledgeGraph.id == id).first()
+    if not kg:
+        raise HTTPException(status_code=404, detail="Knowledge graph not found")
+    
+    if kg.schema:
+        return kg.schema
+    
+    manager = KGSessionManager()
+    try:
+        session = manager._create_kg_session(kg)
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Failed to establish Neo4j connection: {str(e)}"
+        )
+        
+    try:
+        # Fetch labels
+        labels_res = session.run("CALL db.labels()")
+        labels = [record[0] for record in labels_res]
+
+        # Fetch relationship types
+        rels_res = session.run("CALL db.relationshipTypes()")
+        relationships = [record[0] for record in rels_res]
+        
+        # Try to get node type properties
+        properties = []
+        try:
+            props_res = session.run("CALL db.schema.nodeTypeProperties()")
+            properties = [dict(record) for record in props_res]
+        except Exception:
+            pass
+            
+        schema_data = {
+            "node_labels": labels,
+            "relationship_types": relationships,
+            "properties": properties
+        }
+        
+        kg.schema = schema_data
         db.commit()
-        return True
-    return False
+        db.refresh(kg)
+        
+        return schema_data
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error querying Neo4j schema: {str(e)}"
+        )
+    finally:
+        session.close()
 
-def run_query(user: User, query: str, db: Session):
-    session_manager = KGSessionManager()
-    current_connection = get_current_connection(user, db)
-    if not current_connection:
-        raise Exception("Don't have any connection to knowledge graph")
-    session = session_manager.get_session(current_connection)
-    result = session.run(cast(LiteralString, query))
-    return result.data()
+def run_query(db: Session, request: QueryRequest):
+    kg = db.query(KnowledgeGraph).filter(KnowledgeGraph.id == request.knowledge_graph_id).first()
+    if not kg:
+        raise HTTPException(status_code=404, detail="Knowledge graph not found")
+    
+    manager = KGSessionManager()
+    try:
+        session = manager._create_kg_session(kg)
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Failed to establish Neo4j connection: {str(e)}"
+        )
+    try:
+        result = session.run(request.query)
+        return [dict(record) for record in result]
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Query execution failed: {str(e)}")
+    finally:
+        session.close()

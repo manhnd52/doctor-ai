@@ -1,4 +1,4 @@
-from app.kg_connection.models import KgConnection
+from app.kg_connection.models import KnowledgeGraph
 from app.auth.models import User
 from neo4j import GraphDatabase, Session
 
@@ -6,7 +6,7 @@ class KGSessionManager:
     def __init__(self):
         self._cache = {} # Cache to store active sessions keyed by connection ID
 
-    def get_session(self, connection: KgConnection) -> Session:
+    def get_session(self, connection: KnowledgeGraph) -> Session:
         if not connection:
             raise Exception("No active KG connection found.")
         
@@ -19,7 +19,7 @@ class KGSessionManager:
 
         return session
     
-    def validate_connection(self, connection: KgConnection) -> dict | None:
+    def validate(self, connection: KnowledgeGraph) -> dict | None:
         """
         Check connection to the knowledge graph and return the number of nodes and relationships.
         """
@@ -34,7 +34,7 @@ class KGSessionManager:
             print(f"Failed to connect to KG: {str(e)}")
             return None
 
-    def _create_kg_session(self, connection: KgConnection):
+    def _create_kg_session(self, connection: KnowledgeGraph):
         driver = GraphDatabase.driver(
             connection.uri,
             auth=(connection.username, connection.password)

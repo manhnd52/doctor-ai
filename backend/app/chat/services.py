@@ -7,7 +7,7 @@ from app.chat.models import ChatSession, ChatMessage, MessageRole
 from app.chat.exceptions import ChatSessionNotFoundException
 from app.pipeline_data.models import PipelineRun
 from app.pipeline_data.constants import PipelineRunStatus, STEP_DISPLAY_NAMES, PipelineErrorEventData, SSEEventType, PipelineStep
-from app.kg_connection.services import get_current_connection
+
 from app.pipeline_data.services import format_context_for_pipeline
 import json
 
@@ -32,11 +32,12 @@ def get_chat_session_by_id(db: Session, session_id: int, user_id: int) -> ChatSe
     return session
 
 
-def create_chat_session(db: Session, title: str, user_id: int) -> ChatSession:
+def create_chat_session(db: Session, title: str, user_id: int, kg_id: int) -> ChatSession:
     """Create a new chat session for a user"""
     chat_session = ChatSession(
         title=title,
         user_id=user_id,
+        kg_id=kg_id,
     )
     db.add(chat_session)
     db.commit()
@@ -74,7 +75,7 @@ async def stream_chat_message(db: Session, session_id: int, content: str, user_i
     Return response by streaming event
     """
     # Verify chat session exists and belongs to the user
-    get_chat_session_by_id(db, session_id, user_id)
+    session = get_chat_session_by_id(db, session_id, user_id)
 
     # Save user message
     message = ChatMessage(
@@ -105,12 +106,11 @@ async def stream_chat_message(db: Session, session_id: int, content: str, user_i
     from app.pipeline_data.constants import SSEEventType, PipelineStep
     import datetime
 
-    # Retrieve active Neo4j credentials for the user
-    user = db.query(User).filter(User.id == user_id).first()
-    current_connection = get_current_connection(user, db)
+    # Get Neo4j credentials from the knowledge graph associated with the chat session
+    knowledge_graph = session.knowledge_graph
     
-    if not current_connection:
-        error_message = "No active Neo4j connection found. Please create a connection first."
+    if not knowledge_graph:
+        error_message = "No binded knowledge graph found for this chat session."
         yield {
             "event": SSEEventType.ERROR,
             "data": json.dumps(PipelineErrorEventData(
@@ -121,9 +121,9 @@ async def stream_chat_message(db: Session, session_id: int, content: str, user_i
         }
         return
         
-    uri = current_connection.uri
-    username = current_connection.username
-    password = current_connection.password
+    uri = knowledge_graph.uri
+    username = knowledge_graph.username
+    password = knowledge_graph.password
 
     question_type = "LLM"
     steps_list = []

@@ -1,99 +1,77 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-
 from app.database import get_db
-from app.kg_connection.schemas import ConnectionRequest, ConnectionResponse, QueryRequest
-from app.kg_connection.services import (
-    add_kg_connection, 
-    get_all_connections, 
-    connect_to_kg, 
-    delete_connection, 
-    get_current_connection,
-    run_query
+from app.auth.dependencies import get_current_user, require_admin
+from app.auth.models import User
+from app.kg_connection import services
+from app.kg_connection.schemas import (
+    CreateKnowledgeGraphRequest,
+    UpdateKnowledgeGraphRequest,
+    CheckKnowledgeGraphConnectionRequest,
 )
-from app.auth.dependencies import get_current_user
 
-router = APIRouter(prefix="/kg", tags=["kg_connection"])
+router = APIRouter(prefix="/knowledge-graphs", tags=["kg"])
 
-@router.post("/connect", response_model=ConnectionResponse)
-def connect(
-    payload: ConnectionRequest, 
-    db: Session = Depends(get_db), 
-    current_user = Depends(get_current_user)
-):
-    try:
-        connection = add_kg_connection(current_user, payload.uri, payload.database_name, payload.username, payload.password, db)
-        return ConnectionResponse(
-            connection_id=connection.id, 
-            node_count=connection.node_count, 
-            relationship_count=connection.relationship_count, 
-            status=True, 
-            message="Connection added successfully"
-        )
-    
-    except Exception as e:
-        return ConnectionResponse(error=str(e), status=False)
-
-@router.get("/connections")
-def get_connections(
-    db: Session = Depends(get_db), 
-    current_user = Depends(get_current_user)
-):
-    try:
-        connections = get_all_connections(current_user, db)
-        return connections
-    
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e)) 
-
-@router.post("/connect/{connection_id}")
-def reconnect(
-    connection_id: int, 
-    db: Session = Depends(get_db), 
-    current_user = Depends(get_current_user)
-):
-    try:
-        connection = connect_to_kg(current_user, connection_id, db)
-        return ConnectionResponse(connection_id=connection.id, status=True, message="Connected to knowledge graph successfully")
-    
-    except Exception as e:
-        return ConnectionResponse(error=str(e), status=False)
-
-@router.delete("/connections/{connection_id}")
-def delete_connection_endpoint(
-    connection_id: int, 
-    db: Session = Depends(get_db), 
-    current_user = Depends(get_current_user)
-):
-    try:
-        delete_connection(current_user, connection_id, db)
-        return {"status": True, "message": "Connection deleted successfully"}
-    
-    except Exception as e:
-        return {"status": False, "error": str(e)}
-
-@router.get("/current")
-def get_current_connection_endpoint(
-    db: Session = Depends(get_db), 
-    current_user = Depends(get_current_user)
-):
-    try:
-        current_connection = get_current_connection(current_user, db)
-        if not current_connection:
-            return {"status": False, "message": "No active connection found"}
-        return {"status": True, "current_connection": current_connection}
-    
-    except Exception as e:
-        return {"status": False, "error": str(e)}
-    
-@router.post("/query")
-def query_kg(
-    payload: QueryRequest,
+@router.get("/")
+def get_knowledge_graphs(
+    current_user: User = Depends(require_admin),
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
 ):
-    try:
-        result = run_query(current_user, payload.query, db)
-        return {"status": True, "result": result}
-    except Exception as e:
-        return {"status": False, "error": str(e)}
+    """Get the list of knowledge graphs"""
+    return services.get_knowledge_graphs(db=db)
+
+@router.post("/")
+def create_knowledge_graph(
+    request: CreateKnowledgeGraphRequest,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Create a new knowledge graph"""
+    return services.create_knowledge_graph(db=db, request=request)
+
+@router.post("/{id}") 
+def delete_knowledge_graph_post(
+    id: int,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Delete a knowledge graph via POST"""
+    return services.delete_knowledge_graph(db=db, id=id)
+
+@router.put("/{id}")
+def update_knowledge_graph(
+    id: int,
+    request: UpdateKnowledgeGraphRequest,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Update a knowledge graph"""
+    return services.update_knowledge_graph(db=db, id=id, request=request)
+
+@router.delete("/{id}")
+def delete_knowledge_graph(
+    id: int,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Delete a knowledge graph"""
+    return services.delete_knowledge_graph(db=db, id=id)
+
+@router.post("/{id}/check")
+def check_knowledge_graph_connection(
+    id: int,
+    request: CheckKnowledgeGraphConnectionRequest,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Check knowledge graph connection"""
+    return services.check_knowledge_graph_connection(db=db, id=id)
+
+@router.get("/{id}/schema")
+def get_schema(
+    id: int,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """Get the schema of the knowledge graph"""
+    return services.get_schema(db=db, id=id)

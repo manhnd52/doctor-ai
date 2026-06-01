@@ -1,26 +1,23 @@
-from sqlalchemy import Boolean, ForeignKey, Integer, String
+from datetime import datetime
+from sqlalchemy import Boolean, ForeignKey, Integer, String, Text, DateTime, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import Base
 from app.auth.models import User
 
-class KgConnection(Base):
-    __tablename__ = "kg_connections"
+class KnowledgeGraph(Base):
+    __tablename__ = "knowledge_graphs"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     uri: Mapped[str] = mapped_column(String(512), nullable=False)
     database_name: Mapped[str] = mapped_column(String(255), nullable=False)
-    username: Mapped[str] = mapped_column(String(255), default="neo4j", nullable=False)
+    username: Mapped[str] = mapped_column(String(255), nullable=False)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
-    node_count: Mapped[int] = mapped_column(Integer, nullable=True)
-    relationship_count: Mapped[int] = mapped_column(Integer, nullable=True)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    user: Mapped["User"] = relationship("User")
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    schema: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
-class Connecting(Base):
-    __tablename__ = "connecting"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False, unique=True)
-    kg_connection_id: Mapped[int] = mapped_column(Integer, ForeignKey("kg_connections.id"), nullable=False)
-    user: Mapped["User"] = relationship("User")
-    kg_connection: Mapped["KgConnection"] = relationship("KgConnection")
+    chat_sessions: Mapped[list["ChatSession"]] = relationship("ChatSession", back_populates="knowledge_graph")
+
+KgConnection = KnowledgeGraph

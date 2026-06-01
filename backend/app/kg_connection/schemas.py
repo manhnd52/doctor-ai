@@ -1,19 +1,25 @@
 from pydantic import BaseModel
 
-class ConnectionRequest(BaseModel):
+class QueryRequest(BaseModel):
+    knowledge_graph_id: int
+    query: str
+
+class CreateKnowledgeGraphRequest(BaseModel):
+    name: str
+    description: str | None = None
     uri: str
     database_name: str
     username: str
     password: str
 
-class QueryRequest(BaseModel):
-    query: str
+class UpdateKnowledgeGraphRequest(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    uri: str | None = None
+    database_name: str | None = None
+    username: str | None = None
+    password: str | None = None
+    is_active: bool | None = None
 
-class ConnectionResponse(BaseModel):
-    status: bool
-    connection_id: int | None = None
-    node_count: int | None = None
-    relationship_count: int | None = None
-    message: str | None = None
-    error: str | None = None
-
+class CheckKnowledgeGraphConnectionRequest(BaseModel):
+    pass
