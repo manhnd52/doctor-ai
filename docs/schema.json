@@ -1,0 +1,102 @@
+{
+    "labels": [
+        {
+            "id": "Disease",
+            "name": "Disease",
+            "color": "#F77E7E",
+            "description": "Pathological condition of a part, organ, or system of an organism.",
+            "properties": [
+                {
+                    "name": "id",
+                    "type": "string"
+                },
+                {
+                    "name": "name",
+                    "type": "string"
+                },
+                {
+                    "name": "source",
+                    "type": "string"
+                },
+                {
+                    "name": "prevalence",
+                    "type": "string"
+                },
+                {
+                    "name": "epidemiology",
+                    "type": "string"
+                },
+                {
+                    "name": "management_and_treatment",
+                    "type": "string"
+                },
+                {
+                    "name": "causes",
+                    "type": "string"
+                },
+                {
+                    "name": "risk_factors",
+                    "type": "string"
+                },
+                {
+                    "name": "complications",
+                    "type": "string"
+                },
+                {
+                    "name": "prevention",
+                    "type": "string"
+                },
+                {
+                    "name": "when_to_see_a_doctor",
+                    "type": "string"
+                },
+                {
+                    "name": "description",
+                    "type": "string"
+                },
+                {
+                    "name": "index",
+                    "type": "integer"
+                }
+            ]
+        },
+        {
+            "id": "Exposure",
+            "name": "Exposure",
+            "color": "#F5D323",
+            "description": "An environmental or chemical agent to which an organism is subjected.",
+            "properties": [
+                {
+                    "name": "id",
+                    "type": "string"
+                },
+                {
+                    "name": "name",
+                    "type": "string"
+                },
+                {
+                    "name": "source",
+                    "type": "string"
+                },
+                {
+                    "name": "index",
+                    "type": "integer"
+                }
+            ]
+        }
+    ],
+    "relationships": [
+        {
+            "name": "PHENOTYPE_PRESENT",
+            "source": "Disease",
+            "target": "EffectOrPhenotype",
+            "properties": []
+        },
+        {
+            "name": "ASSOCIATED_WITH",
+            "source": "Disease",
+            "target": "GeneOrProtein",
+            "properties": []
+        }
+    ]
+}

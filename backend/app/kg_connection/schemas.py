@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from datetime import datetime
+from typing import Optional
 
 class QueryRequest(BaseModel):
     knowledge_graph_id: int
@@ -23,3 +25,17 @@ class UpdateKnowledgeGraphRequest(BaseModel):
 
 class CheckKnowledgeGraphConnectionRequest(BaseModel):
     pass
+
+class KnowledgeGraphResponse(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+    uri: str
+    database_name: str
+    is_active: bool
+    created_at: datetime
+    schema: Optional[dict] = None
+
+    class Config:
+        from_attributes = True
+

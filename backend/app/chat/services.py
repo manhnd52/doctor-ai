@@ -22,7 +22,7 @@ async def chat_generator(chat_responses: List[ChatMessage]):
 
 def get_chat_session_by_id(db: Session, session_id: int, user_id: int) -> ChatSession:
     """Retrieve a chat session by id and user_id, raise ChatSessionNotFoundException if not found"""
-    session = db.query(ChatSession).filter(
+    session = db.query(ChatSession).options(joinedload(ChatSession.knowledge_graph)).filter(
         ChatSession.id == session_id,
         ChatSession.user_id == user_id,
     ).first()
@@ -47,7 +47,7 @@ def create_chat_session(db: Session, title: str, user_id: int, kg_id: int) -> Ch
 
 def get_chat_sessions(db: Session, user_id: int) -> List[ChatSession]:
     """Retrieve all chat sessions for a user"""
-    return db.query(ChatSession).filter(
+    return db.query(ChatSession).options(joinedload(ChatSession.knowledge_graph)).filter(
         ChatSession.user_id == user_id
     ).all()
 

@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List, Optional
 from app.chat.constants import MessageRole
 from app.pipeline_data.schemas import PipelineRunResponse
+from app.kg_connection.schemas import KnowledgeGraphResponse
 
 class MessageBase(BaseModel):
     content: str
@@ -30,7 +31,7 @@ class ChatSessionResponse(BaseModel):
     id: int
     title: str
     user_id: int
-    kg_id: int
+    knowledge_graph: KnowledgeGraphResponse
     created_at: datetime
 
     class Config:

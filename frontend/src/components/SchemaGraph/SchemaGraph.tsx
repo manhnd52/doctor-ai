@@ -156,9 +156,10 @@ const edgeTypes = {
 
 interface SchemaGraphProps {
     schema?: GraphData;
+    height?: string;
 }
 
-function SchemaGraphInner({ schema = defaultSchema }: SchemaGraphProps) {
+function SchemaGraphInner({ schema = defaultSchema, height }: SchemaGraphProps) {
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const { fitView } = useReactFlow();
@@ -185,7 +186,8 @@ function SchemaGraphInner({ schema = defaultSchema }: SchemaGraphProps) {
         <div
             style={{
                 display: "flex",
-                height: "100vh",
+                height: height || "100vh",
+                width: "100%",
             }}
         >
             <div style={{ flex: 1 }}>

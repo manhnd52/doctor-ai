@@ -8,11 +8,12 @@ from app.kg_connection.schemas import (
     CreateKnowledgeGraphRequest,
     UpdateKnowledgeGraphRequest,
     CheckKnowledgeGraphConnectionRequest,
+    KnowledgeGraphResponse,
 )
 
 router = APIRouter(prefix="/knowledge-graphs", tags=["kg"])
 
-@router.get("/")
+@router.get("/", response_model=list[KnowledgeGraphResponse])
 def get_knowledge_graphs(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -27,7 +28,7 @@ def get_knowledge_graphs(
     else: 
         return services.get_active_knowledge_graph(db=db)
 
-@router.post("/")
+@router.post("/", response_model=KnowledgeGraphResponse)
 def create_knowledge_graph(
     request: CreateKnowledgeGraphRequest,
     current_user: User = Depends(require_admin),
@@ -36,16 +37,19 @@ def create_knowledge_graph(
     """Create a new knowledge graph"""
     return services.create_knowledge_graph(db=db, request=request)
 
-@router.post("/{id}") 
-def delete_knowledge_graph_post(
+@router.get("/{id}") 
+def get_knowledge_graph(
     id: int,
-    current_user: User = Depends(require_admin),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Delete a knowledge graph via POST"""
-    return services.delete_knowledge_graph(db=db, id=id)
+    """Get a knowledge graph"""
+    kg = services.get_knowledge_graph_by_id(db=db, id=id)
+    if not kg:
+        raise HTTPException(status_code=404, detail="Knowledge graph not found")
+    return kg
 
-@router.put("/{id}")
+@router.put("/{id}", response_model=KnowledgeGraphResponse)
 def update_knowledge_graph(
     id: int,
     request: UpdateKnowledgeGraphRequest,
@@ -81,4 +85,4 @@ def get_schema(
     db: Session = Depends(get_db),
 ):
     """Get the schema of the knowledge graph"""
-    return services.get_schema(db=db, id=id)
+    return services.refresh_schema(db=db, id=id)

@@ -7,7 +7,6 @@ import Inspector from "../components/Inspector"
 import { ensureAuthenticated } from "../services"
 import { useUIStore } from "../store/uiStore"
 import { useChatStore } from "../store/chatStore"
-import { useConnectionStore } from "../store/connectionStore"
 import { AlertCircle, Loader2, Layers, Database } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
@@ -38,8 +37,6 @@ export default function Chatbot() {
     setGraphSelectorOpen,
   } = useUIStore()
 
-  const { fetchCurrentConnection } = useConnectionStore()
-
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -61,7 +58,6 @@ export default function Chatbot() {
         await ensureAuthenticated()
         await Promise.all([
           loadSessions(),
-          fetchCurrentConnection(),
         ])
       } catch (err: any) {
         setAuthError(err.message || "Authentication failed. Please check if backend is running.")

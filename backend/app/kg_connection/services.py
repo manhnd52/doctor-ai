@@ -12,6 +12,10 @@ def get_knowledge_graphs(db: Session):
     """Retrieve all knowledge graphs"""
     return db.query(KnowledgeGraph).all()
 
+def get_knowledge_graph_by_id(db: Session, id: int):
+    """Retrieve a knowledge graph"""
+    return db.query(KnowledgeGraph).filter(KnowledgeGraph.id == id).first()
+
 def get_active_knowledge_graph(db: Session):
     """Retrieve all active (aka available) knowledge graphs"""
     return db.query(KnowledgeGraph).filter(KnowledgeGraph.is_active == True).all()
@@ -100,6 +104,14 @@ def get_schema(db: Session, id: int):
     if kg.schema:
         return kg.schema
     
+    return refresh_schema(db, id)
+
+def refresh_schema(db: Session, id: int):
+    """Refresh the schema of the knowledge graph and cache it in the database"""
+    kg = db.query(KnowledgeGraph).filter(KnowledgeGraph.id == id).first()
+    if not kg:
+        raise HTTPException(status_code=404, detail="Knowledge graph not found")
+    
     manager = KGSessionManager()
     try:
         session = manager._create_kg_session(kg)
@@ -110,26 +122,83 @@ def get_schema(db: Session, id: int):
         )
         
     try:
-        # Fetch labels
+        # 1. Fetch labels
         labels_res = session.run("CALL db.labels()")
-        labels = [record[0] for record in labels_res]
+        label_names = [record[0] for record in labels_res]
 
-        # Fetch relationship types
-        rels_res = session.run("CALL db.relationshipTypes()")
-        relationships = [record[0] for record in rels_res]
-        
-        # Try to get node type properties
-        properties = []
+        # 2. Fetch properties
+        properties_by_label = {}
         try:
             props_res = session.run("CALL db.schema.nodeTypeProperties()")
-            properties = [dict(record) for record in props_res]
+            for record in props_res:
+                rec_dict = dict(record)
+                node_labels = rec_dict.get("nodeType") or rec_dict.get("nodeLabels")
+                prop_name = rec_dict.get("propertyName")
+                prop_types = rec_dict.get("propertyTypes")
+                
+                if not node_labels or not prop_name:
+                    continue
+                    
+                if isinstance(node_labels, str):
+                    node_labels = [node_labels]
+                    
+                for label in node_labels:
+                    if label not in properties_by_label:
+                        properties_by_label[label] = []
+                    
+                    prop_type = "string"
+                    if prop_types and len(prop_types) > 0:
+                        t = prop_types[0].lower()
+                        if "string" in t:
+                            prop_type = "string"
+                        elif "int" in t or "long" in t or "integer" in t:
+                            prop_type = "integer"
+                        elif "float" in t or "double" in t or "number" in t:
+                            prop_type = "float"
+                        elif "bool" in t:
+                            prop_type = "boolean"
+                            
+                    properties_by_label[label].append({
+                        "name": prop_name,
+                        "type": prop_type
+                    })
         except Exception:
             pass
-            
+
+        # 3. Assemble labels list
+        labels_list = []
+        for idx, name in enumerate(label_names):
+            labels_list.append({
+                "name": name,
+                "description": f"Nodes with label {name}",
+                "properties": properties_by_label.get(name, [])
+            })
+
+        # 4. Fetch relationships with source and target
+        relationships_list = []
+        try:
+            rels_query = """
+            MATCH (a)-[r]->(b)
+            WITH labels(a) AS a_labels, type(r) AS rel_type, labels(b) AS b_labels
+            UNWIND a_labels AS source
+            UNWIND b_labels AS target
+            RETURN DISTINCT rel_type AS name, source, target
+            """
+            rels_res = session.run(rels_query)
+            for record in rels_res:
+                rec_dict = dict(record)
+                relationships_list.append({
+                    "name": rec_dict.get("name"),
+                    "source": rec_dict.get("source"),
+                    "target": rec_dict.get("target"),
+                    "properties": []
+                })
+        except Exception:
+            pass
+
         schema_data = {
-            "node_labels": labels,
-            "relationship_types": relationships,
-            "properties": properties
+            "labels": labels_list,
+            "relationships": relationships_list
         }
         
         kg.schema = schema_data

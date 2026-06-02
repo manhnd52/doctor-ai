@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { chatService } from "../services/chatService"
-import type { ChatSession } from "../types/ChatType"
+import type { ChatSession, KnowledgeGraph } from "../types/ChatType"
 import type { Message, PipelineRun } from "../components/MessageItem"
 
 export function getStepDisplayName(stepName: string): string {
@@ -21,6 +21,7 @@ export function getStepDisplayName(stepName: string): string {
 
 interface SessionState {
   messages: Message[]
+  knowledge_graph: KnowledgeGraph | null
   sending_message: boolean
   streamingMessage: string | null
   streamingQuestionType: "PIPELINE" | "LLM" | null
@@ -34,6 +35,7 @@ interface ChatState {
   activeSessionId: number | null
   sessionStates: Record<number, SessionState>
   messages: Message[]
+  knowledge_graph: KnowledgeGraph | null
   loading: boolean
   sending_message: boolean
   streamingMessage: string | null
@@ -63,6 +65,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   activeSessionId: null,
   sessionStates: {},
   messages: [],
+  knowledge_graph: null,
   loading: false,
   sending_message: false,
   streamingMessage: null,
@@ -76,6 +79,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const currentStates = get().sessionStates
     const prevState = currentStates[sessionId] || {
       messages: [],
+      knowledge_graph: null,
       sending_message: false,
       streamingMessage: null,
       streamingQuestionType: null,
@@ -116,6 +120,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   clearActiveSession: () => set({
     activeSessionId: null,
     messages: [],
+    knowledge_graph: null,
     sending_message: false,
     streamingMessage: null,
     streamingQuestionType: null,
@@ -144,6 +149,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const currentStates = get().sessionStates
     const sessionState = currentStates[id] || {
       messages: [],
+      knowledge_graph: null,
       sending_message: false,
       streamingMessage: null,
       streamingQuestionType: null,
@@ -155,6 +161,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set({
       activeSessionId: id,
       messages: sessionState.messages,
+      knowledge_graph: sessionState.knowledge_graph,
       sending_message: sessionState.sending_message,
       streamingMessage: sessionState.streamingMessage,
       streamingQuestionType: sessionState.streamingQuestionType,
@@ -201,6 +208,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
           ...(isDeletingActive ? {
             activeSessionId: null,
             messages: [],
+            knowledge_graph: null,
             sending_message: false,
             streamingMessage: null,
             streamingQuestionType: null,
