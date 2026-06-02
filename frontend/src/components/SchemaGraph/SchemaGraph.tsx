@@ -15,12 +15,12 @@ import "reactflow/dist/style.css";
 import { useState, useEffect } from "react";
 
 import { schema as rawSchema } from "../../assets/schema";
-import { mapSchemaToGraphData } from "./types";
+import { convertSchemaToGraphData } from "./types";
 import SchemaNode from "./SchemaNode";
 import CustomEdge from "./CustomEdge";
 import ELK from "elkjs/lib/elk.bundled.js";
 
-const defaultSchema = mapSchemaToGraphData(rawSchema);
+const defaultSchema = convertSchemaToGraphData(rawSchema);
 
 export function buildGraph(graphData: GraphData) {
     const nodes: Node[] = graphData.nodes.map(

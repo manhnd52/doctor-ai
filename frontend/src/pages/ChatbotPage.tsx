@@ -9,6 +9,8 @@ import { useUIStore } from "../store/uiStore"
 import { useChatStore } from "../store/chatStore"
 import { AlertCircle, Loader2, Layers, Database } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import SchemaGraphModal from "../components/SchemaGraphModal"
+import { convertSchemaToGraphData } from "../components/SchemaGraph/types"
 
 export default function Chatbot() {
   const [authError, setAuthError] = useState<string | null>(null)
@@ -35,8 +37,11 @@ export default function Chatbot() {
     setHasPipelineRun,
     isGraphSelectorOpen,
     setGraphSelectorOpen,
+    isSchemaModalOpen,
+    setSchemaModalOpen,
   } = useUIStore()
 
+  const activeSession = sessions.find((s) => s.id === activeSessionId)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -217,6 +222,15 @@ export default function Chatbot() {
 
       {/* Selector Modal */}
       {isGraphSelectorOpen && <KnowledgeGraphSelector />}
+
+      {/* Schema Graph Modal */}
+      {isSchemaModalOpen && activeSession?.knowledge_graph?.schema && (
+        <SchemaGraphModal
+          isOpen={isSchemaModalOpen}
+          onClose={() => setSchemaModalOpen(false)}
+          schema={convertSchemaToGraphData(activeSession.knowledge_graph.schema)}
+        />
+      )}
     </div>
   )
 }

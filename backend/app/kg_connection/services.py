@@ -143,27 +143,18 @@ def refresh_schema(db: Session, id: int):
                     node_labels = [node_labels]
                     
                 for label in node_labels:
-                    if label not in properties_by_label:
-                        properties_by_label[label] = []
+                    clean_label = label.lstrip(":") if isinstance(label, str) else str(label)
+                    clean_label = clean_label.strip("`").strip()
+                    if clean_label not in properties_by_label:
+                        properties_by_label[clean_label] = []
                     
-                    prop_type = "string"
-                    if prop_types and len(prop_types) > 0:
-                        t = prop_types[0].lower()
-                        if "string" in t:
-                            prop_type = "string"
-                        elif "int" in t or "long" in t or "integer" in t:
-                            prop_type = "integer"
-                        elif "float" in t or "double" in t or "number" in t:
-                            prop_type = "float"
-                        elif "bool" in t:
-                            prop_type = "boolean"
-                            
-                    properties_by_label[label].append({
+                    prop_type = prop_types[0].lower()
+                    properties_by_label[clean_label].append({
                         "name": prop_name,
                         "type": prop_type
                     })
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Error fetching schema properties: {e}")
 
         # 3. Assemble labels list
         labels_list = []

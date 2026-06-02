@@ -24,9 +24,9 @@ export interface GraphData {
     edges: GraphEdge[];
 }
 
-export function mapSchemaToGraphData(rawSchema: any): GraphData {
+export function convertSchemaToGraphData(rawSchema: any): GraphData {
     const nodes: GraphNode[] = (rawSchema.labels || []).map((label: any) => ({
-        id: label.id,
+        id: label.name,
         description: label.description,
         name: label.name,
         color: label.color,

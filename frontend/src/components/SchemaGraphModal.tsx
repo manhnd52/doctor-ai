@@ -1,3 +1,4 @@
+import { useChatStore } from "@/store/chatStore"
 import Modal from "./Modal"
 import SchemaGraph from "./SchemaGraph/SchemaGraph"
 import type { GraphData } from "./SchemaGraph/types"
@@ -5,7 +6,7 @@ import type { GraphData } from "./SchemaGraph/types"
 interface SchemaGraphModalProps {
   isOpen: boolean
   onClose: () => void
-  schema?: GraphData
+  schema: GraphData
 }
 
 export default function SchemaGraphModal({
@@ -13,11 +14,15 @@ export default function SchemaGraphModal({
   onClose,
   schema,
 }: SchemaGraphModalProps) {
+  const activeSessionId = useChatStore((state) => state.activeSessionId)
+  const activeSession = useChatStore((state) => state.sessions.find((s) => s.id === activeSessionId))
+  const knowledgeGraphName = activeSession?.knowledge_graph?.name
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Knowledge Schema Graph"
+      title={knowledgeGraphName + "'s schema"}
       size="2xl"
       className="!max-h-[95vh]"
     >

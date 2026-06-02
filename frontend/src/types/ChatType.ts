@@ -2,7 +2,7 @@ export interface ChatSession {
     id: number
     title: string
     created_at: string
-    kg_id: number
+    knowledge_graph: KnowledgeGraph
 }
 
 export interface KnowledgeGraph {
@@ -11,7 +11,8 @@ export interface KnowledgeGraph {
     description?: string
     uri: string
     database_name: string
+    username: string
     is_active: boolean
     created_at: string
-    schema: Object
+    schema: any
 }

@@ -8,6 +8,11 @@ export const chatService = {
     return res.data
   },
 
+  async getSessionById(sessionId: number): Promise<ChatSession> {
+    const res = await api.get<ChatSession>(`/chat/sessions/${sessionId}`)
+    return res.data
+  },
+
   async getMessages(sessionId: number): Promise<Message[]> {
     const res = await api.get<Message[]>(`/chat/sessions/${sessionId}/messages`)
     return res.data
@@ -19,9 +24,9 @@ export const chatService = {
   },
 
   async createSession(title: string, knowledgeGraphId: number): Promise<ChatSession> {
-    const res = await api.post<ChatSession>("/chat/sessions", { 
-      title, 
-      knowledge_graph_id: knowledgeGraphId 
+    const res = await api.post<ChatSession>("/chat/sessions", {
+      title,
+      knowledge_graph_id: knowledgeGraphId
     })
     return res.data
   },
