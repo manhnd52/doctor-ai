@@ -11,6 +11,7 @@ def build_nlp_subgraph(evaluate=False):
 
     builder.add_node("triple_extraction", tripple_extraction_node)
     builder.add_node("entity_extraction", entity_extraction_node)
+    builder.add_node("concept_extraction", concept_extraction_node)
     builder.add_node("triple_remediation", triple_remediation_node)
     builder.add_node("entity_linking", entity_linking_node)
     builder.add_node("cypher_generation", cypher_generation_node)
@@ -21,9 +22,11 @@ def build_nlp_subgraph(evaluate=False):
     # entry
     builder.add_edge(START, "triple_extraction")
     builder.add_edge(START, "entity_extraction")
+    builder.add_edge(START, "concept_extraction")
 
     builder.add_edge("triple_extraction", "triple_remediation")
     builder.add_edge("entity_extraction", "triple_remediation")
+    builder.add_edge("concept_extraction", "triple_remediation")
 
     builder.add_edge("triple_remediation", "entity_linking")
     builder.add_edge("entity_linking", "cypher_generation")

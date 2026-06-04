@@ -33,6 +33,7 @@ class GraphState(TypedDict, total=False):
     relationships: List[str]
     labels: List[str]
     triples: List[Dict]
+    concepts: List[str]
     
     # step_02_entity_linking
     linked_entities: List[Dict]

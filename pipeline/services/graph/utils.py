@@ -205,7 +205,8 @@ def remidiate_label(label: str, label_type: Literal["node", "relationship"], thr
     schema = get_schema()
     valid_labels = []
     if label_type == "node":
-        valid_labels = schema.get("node_types", [])
+        node_types = schema.get("node_types", [])
+        valid_labels = [node["type"] for node in node_types]
     elif label_type == "relationship":
         valid_labels = schema.get("relationship_types", [])
     else:

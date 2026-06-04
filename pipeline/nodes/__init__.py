@@ -10,6 +10,7 @@ from .utils.triple_extraction import tripple_extraction_node
 from .utils.triple_remediation import triple_remediation_node
 from .cypher_validation import cypher_validation_node
 from .cypher_correction import cypher_correction_node
+from .concept_extraction import concept_extraction_node
 
 __all__ = [
     "classify_question_node",
@@ -23,5 +24,6 @@ __all__ = [
     "tripple_extraction_node",
     "triple_remediation_node",
     "cypher_validation_node",
-    "cypher_correction_node"
+    "cypher_correction_node",
+    "concept_extraction_node"
 ]

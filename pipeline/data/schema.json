@@ -1,0 +1,745 @@
+{
+    "node_props": {
+        "disease": [
+            {
+                "property": "id",
+                "type": "STRING"
+            },
+            {
+                "property": "name",
+                "type": "STRING"
+            },
+            {
+                "property": "source",
+                "type": "STRING"
+            },
+            {
+                "property": "prevalence",
+                "type": "STRING"
+            },
+            {
+                "property": "epidemiology",
+                "type": "STRING"
+            },
+            {
+                "property": "management_and_treatment",
+                "type": "STRING"
+            },
+            {
+                "property": "causes",
+                "type": "STRING"
+            },
+            {
+                "property": "risk_factors",
+                "type": "STRING"
+            },
+            {
+                "property": "complications",
+                "type": "STRING"
+            },
+            {
+                "property": "prevention",
+                "type": "STRING"
+            },
+            {
+                "property": "when_to_see_a_doctor",
+                "type": "STRING"
+            },
+            {
+                "property": "description",
+                "type": "STRING"
+            },
+            {
+                "property": "index",
+                "type": "INTEGER"
+            }
+        ],
+        "exposure": [
+            {
+                "property": "id",
+                "type": "STRING"
+            },
+            {
+                "property": "name",
+                "type": "STRING"
+            },
+            {
+                "property": "source",
+                "type": "STRING"
+            },
+            {
+                "property": "index",
+                "type": "INTEGER"
+            }
+        ],
+        "anatomy": [
+            {
+                "property": "id",
+                "type": "STRING"
+            },
+            {
+                "property": "name",
+                "type": "STRING"
+            },
+            {
+                "property": "source",
+                "type": "STRING"
+            },
+            {
+                "property": "index",
+                "type": "INTEGER"
+            }
+        ],
+        "biological_process": [
+            {
+                "property": "id",
+                "type": "STRING"
+            },
+            {
+                "property": "name",
+                "type": "STRING"
+            },
+            {
+                "property": "source",
+                "type": "STRING"
+            },
+            {
+                "property": "index",
+                "type": "INTEGER"
+            }
+        ],
+        "approval_status": [
+            {
+                "property": "name",
+                "type": "STRING",
+                "value": [
+                    "approved",
+                    "investigational",
+                    "vet_approved",
+                    "experimental",
+                    "withdrawn",
+                    "nutraceutical",
+                    "illicit"
+                ],
+                "description": "The approval status of the drug. Detail: - 'approved': The drug has been approved for use by regulatory agencies. - 'investigational': The drug is currently being studied in clinical trials but has not yet been approved for general use. - 'vet_approved': The drug has been approved for veterinary use like dog, cat. IF question contains animal (dog, cat, horse, ...) → add constraint: approval_status = vet_approved - 'experimental': The drug is in the early stages of research and development and has not yet been approved for use. - 'withdrawn': The drug was previously approved but has been withdrawn from the market, often due to safety concerns. - 'nutraceutical': The drug is classified as a nutraceutical, which is a product derived from food sources that provides health benefits in addition to basic nutritional value. - 'illicit': The drug is classified as illicit, meaning it is illegal to manufacture, distribute, or possess under law."
+            },
+            {
+                "property": "index",
+                "type": "INTEGER"
+            }
+        ],
+        "pathway": [
+            {
+                "property": "id",
+                "type": "STRING"
+            },
+            {
+                "property": "name",
+                "type": "STRING"
+            },
+            {
+                "property": "source",
+                "type": "STRING"
+            },
+            {
+                "property": "index",
+                "type": "INTEGER"
+            }
+        ],
+        "effect_or_phenotype": [
+            {
+                "property": "id",
+                "type": "STRING"
+            },
+            {
+                "property": "name",
+                "type": "STRING"
+            },
+            {
+                "property": "source",
+                "type": "STRING"
+            },
+            {
+                "property": "index",
+                "type": "INTEGER"
+            }
+        ],
+        "cellular_component": [
+            {
+                "property": "id",
+                "type": "STRING"
+            },
+            {
+                "property": "name",
+                "type": "STRING"
+            },
+            {
+                "property": "source",
+                "type": "STRING"
+            },
+            {
+                "property": "index",
+                "type": "INTEGER"
+            }
+        ],
+        "category": [
+            {
+                "property": "name",
+                "type": "STRING"
+            },
+            {
+                "property": "index",
+                "type": "INTEGER"
+            }
+        ],
+        "gene_or_protein": [
+            {
+                "property": "id",
+                "type": "STRING"
+            },
+            {
+                "property": "name",
+                "type": "STRING"
+            },
+            {
+                "property": "source",
+                "type": "STRING"
+            },
+            {
+                "property": "index",
+                "type": "INTEGER"
+            }
+        ],
+        "molecular_function": [
+            {
+                "property": "id",
+                "type": "STRING"
+            },
+            {
+                "property": "name",
+                "type": "STRING"
+            },
+            {
+                "property": "source",
+                "type": "STRING"
+            },
+            {
+                "property": "index",
+                "type": "INTEGER"
+            }
+        ],
+        "drug": [
+            {
+                "property": "id",
+                "type": "STRING"
+            },
+            {
+                "property": "name",
+                "type": "STRING"
+            },
+            {
+                "property": "source",
+                "type": "STRING"
+            },
+            {
+                "property": "description",
+                "type": "STRING"
+            },
+            {
+                "property": "half_life",
+                "type": "STRING"
+            },
+            {
+                "property": "mechanism_of_action",
+                "type": "STRING"
+            },
+            {
+                "property": "pharmacodynamics",
+                "type": "STRING"
+            },
+            {
+                "property": "aggregate_state",
+                "description": "the physical state of the drug",
+                "type": "STRING",
+                "values": [
+                    "solid",
+                    "liquid",
+                    "gas",
+                    "no information available"
+                ]
+            },
+            {
+                "property": "index",
+                "type": "INTEGER"
+            },
+            {
+                "property": "molecular_weight",
+                "type": "FLOAT"
+            },
+            {
+                "property": "tpsa",
+                "type": "FLOAT"
+            },
+            {
+                "property": "clogp",
+                "type": "FLOAT"
+            }
+        ]
+    },
+    "rel_props": {},
+    "relationships": [
+        {
+            "start": "disease",
+            "type": "associated_with",
+            "end": "gene_or_protein",
+            "description": "Suggests a relationship or correlation between a gene/protein and a disease. This is a general relationship that can represent various types of associations between a gene/protein and a disease."
+        },
+        {
+            "start": "disease",
+            "type": "phenotype_present",
+            "end": "effect_or_phenotype",
+            "description": "phenotype is \"The assemblage of traits or outward appearance of an individual. It is the product of interactions between genes and between genes and the environment.\" phenotype present means a specific phenotype is observed"
+        },
+        {
+            "start": "disease",
+            "type": "phenotype_absent",
+            "end": "effect_or_phenotype",
+            "description": "Indicates that a specific phenotype is not observed in the context of a disease."
+        },
+        {
+            "start": "disease",
+            "type": "parent_child",
+            "end": "disease",
+            "description": "\"is a \" relation: Indicates that one entity is a subtype or specific instance of another."
+        },
+        {
+            "start": "disease",
+            "type": "contraindication",
+            "end": "drug",
+            "description": "A symptom or medical condition that makes a particular treatment or procedure inadvisable because a person is likely to have a bad reaction.[NCIT]\n'A contraindication is a disposition that increases the risk of harm involved in using a particular drug, carrying out a medical procedure, or engaging in a particular activity such that the risk of harm exceeds a threshold. An contraindication serves as a reason to withhold a certain medical treatment."
+        },
+        {
+            "start": "disease",
+            "type": "off_label_use",
+            "end": "drug",
+            "description": "The use of an FDA-approved device, drug, or treatment for a purpose other than that for which it was approved."
+        },
+        {
+            "start": "disease",
+            "type": "indication",
+            "end": "drug",
+            "description": "Description or common names of diseases that the drug is used to treat."
+        },
+        {
+            "start": "disease",
+            "type": "linked_to",
+            "end": "exposure",
+            "description": "The disease is associated with or caused by exposure."
+        },
+        {
+            "start": "exposure",
+            "type": "interacts_with",
+            "end": "gene_or_protein",
+            "description": "The exposure affects/causes a change in the gene or protein."
+        },
+        {
+            "start": "exposure",
+            "type": "interacts_with",
+            "end": "biological_process",
+            "description": "The biological process is affected/caused by the exposure."
+        },
+        {
+            "start": "exposure",
+            "type": "interacts_with",
+            "end": "cellular_component",
+            "description": "The cellular component is affected by the exposure."
+        },
+        {
+            "start": "exposure",
+            "type": "interacts_with",
+            "end": "molecular_function",
+            "description": "A gene/protein has a specific molecular function"
+        },
+        {
+            "start": "exposure",
+            "type": "parent_child",
+            "end": "exposure",
+            "description": "\"is a \" relation: Indicates that one entity is a subtype or specific instance of another."
+        },
+        {
+            "start": "exposure",
+            "type": "linked_to",
+            "end": "disease",
+            "description": "Suggests a relationship or correlation between an exposure and a disease."
+        },
+        {
+            "start": "anatomy",
+            "type": "parent_child",
+            "end": "anatomy",
+            "description": "\"is a \" relation: Indicates that one entity is a subtype or specific instance of another."
+        },
+        {
+            "start": "anatomy",
+            "type": "expression_present",
+            "end": "gene_or_protein",
+            "description": "The process in which a gene's sequence is converted into a mature gene product (protein or RNA). This includes the production of an RNA transcript and its processing, as well as translation and maturation for protein-coding genes."
+        },
+        {
+            "start": "anatomy",
+            "type": "expression_absent",
+            "end": "gene_or_protein",
+            "description": "a negative regulation process that inhibits gene expression level"
+        },
+        {
+            "start": "biological_process",
+            "type": "interacts_with",
+            "end": "gene_or_protein",
+            "description": "Gene/protein participates in a biological process. (interactions like up/down regulates, is involved in)"
+        },
+        {
+            "start": "biological_process",
+            "type": "interacts_with",
+            "end": "exposure",
+            "description": "The biological process is affected/caused by the exposure."
+        },
+        {
+            "start": "biological_process",
+            "type": "parent_child",
+            "end": "biological_process",
+            "description": "\"is a \" relation: Indicates that one entity is a subtype or specific instance of another."
+        },
+        {
+            "start": "pathway",
+            "type": "parent_child",
+            "end": "pathway",
+            "description": "\"is a \" relation: Indicates that one entity is a subtype or specific instance of another."
+        },
+        {
+            "start": "pathway",
+            "type": "interacts_with",
+            "end": "gene_or_protein",
+            "description": "The gene or protein participates in the pathway."
+        },
+        {
+            "start": "effect_or_phenotype",
+            "type": "parent_child",
+            "end": "effect_or_phenotype",
+            "description": "\"is a \" relation: Indicates that one entity is a subtype or specific instance of another."
+        },
+        {
+            "start": "effect_or_phenotype",
+            "type": "phenotype_present",
+            "end": "disease",
+            "description": "phenotype is \"The assemblage of traits or outward appearance of an individual. It is the product of interactions between genes and between genes and the environment.\" phenotype present means a specific phenotype is observed"
+        },
+        {
+            "start": "effect_or_phenotype",
+            "type": "phenotype_absent",
+            "end": "disease",
+            "description": "Indicates that a specific phenotype is not observed in the context of a disease."
+        },
+        {
+            "start": "effect_or_phenotype",
+            "type": "side_effect",
+            "end": "drug",
+            "description": "The term was used in various ways in the past, to describe unintended effects of medical intervention, usually negative (unfavourable), but also positive (favourable) ones. It is recommended that this term no longer be used and particularly should not be regarded as synonymous with adverse event or adverse reaction."
+        },
+        {
+            "start": "effect_or_phenotype",
+            "type": "associated_with",
+            "end": "gene_or_protein",
+            "description": "Suggests a relationship or correlation between a gene/protein and a phenotype."
+        },
+        {
+            "start": "cellular_component",
+            "type": "parent_child",
+            "end": "cellular_component",
+            "description": "\"is a \" relation: Indicates that one entity is a subtype or specific instance of another."
+        },
+        {
+            "start": "cellular_component",
+            "type": "interacts_with",
+            "end": "gene_or_protein",
+            "description": "A gene/protein is located in a cellular component // Gene/protein is located in or interacts with a cellular component."
+        },
+        {
+            "start": "cellular_component",
+            "type": "interacts_with",
+            "end": "exposure",
+            "description": "The cellular component is affected by the exposure."
+        },
+        {
+            "start": "gene_or_protein",
+            "type": "associated_with",
+            "end": "disease",
+            "description": "Suggests a relationship or correlation between a gene/protein and a disease."
+        },
+        {
+            "start": "gene_or_protein",
+            "type": "associated_with",
+            "end": "effect_or_phenotype",
+            "description": "Suggests a relationship or correlation between a gene/protein and a phenotype."
+        },
+        {
+            "start": "gene_or_protein",
+            "type": "expression_present",
+            "end": "anatomy",
+            "description": "The process in which a gene's sequence is converted into a mature gene product (protein or RNA). This includes the production of an RNA transcript and its processing, as well as translation and maturation for protein-coding genes."
+        },
+        {
+            "start": "gene_or_protein",
+            "type": "interacts_with",
+            "end": "pathway",
+            "description": "The gene or protein participates in the pathway."
+        },
+        {
+            "start": "gene_or_protein",
+            "type": "interacts_with",
+            "end": "biological_process",
+            "description": "Gene/protein participates in a biological process. (interactions like up/down regulates, is involved in)"
+        },
+        {
+            "start": "gene_or_protein",
+            "type": "interacts_with",
+            "end": "cellular_component",
+            "description": "A gene/protein is located in a cellular component // Gene/protein is located in or interacts with a cellular component."
+        },
+        {
+            "start": "gene_or_protein",
+            "type": "interacts_with",
+            "end": "molecular_function",
+            "description": "A gene/protein has a specific molecular function"
+        },
+        {
+            "start": "gene_or_protein",
+            "type": "interacts_with",
+            "end": "exposure",
+            "description": "The exposure affects/causes a change in the gene or protein."
+        },
+        {
+            "start": "gene_or_protein",
+            "type": "ppi",
+            "end": "gene_or_protein",
+            "description": "Temporary, non-covalent binding between protein molecules. Protein-protein interactions occur as a result of intermolecular physical forces and spatial complementation between domains or motifs. This interaction can be either homotypic or heterotypic and effect protein structure, conformation, and function."
+        },
+        {
+            "start": "gene_or_protein",
+            "type": "target",
+            "end": "drug",
+            "description": "A material entity, such as native (gene product) protein, protein complex, microorganism, DNA , etc., that physically interacts with a therapeutic or prophylactic drug (with some binding affinity) and where this physical interaction is (at least partially) the cause of a (detectable) clinical effect."
+        },
+        {
+            "start": "gene_or_protein",
+            "type": "expression_absent",
+            "end": "anatomy",
+            "description": "a negative regulation process that inhibits gene expression level"
+        },
+        {
+            "start": "gene_or_protein",
+            "type": "enzyme",
+            "end": "drug",
+            "description": "Gene/protein encodes an enzyme that metabolizes the drug. \nDrug Metabolism: A series of chemical modifications of a drug compound by enzymatic activity that make the substrate (drug) more water soluble to allow its clearance from the body. Drug metabolism occurs in two phases: Phase I (biotransformation) involves oxidation, hydroxylation reduction, and hydrolysis. Phase II (conjugation) involves synthesis and conjugation."
+        },
+        {
+            "start": "gene_or_protein",
+            "type": "transporter",
+            "end": "drug",
+            "description": "Integral membrane proteins that transport molecules or ions into or out of the cell or compartment.\nA protein that is involved in the directed movement of substances into, out of, within or between cells.\n \"transport protein\" is an umbrella term for e.g. carrier proteins, channel proteins and protein pumps"
+        },
+        {
+            "start": "gene_or_protein",
+            "type": "carrier",
+            "end": "drug",
+            "description": "Proteins that bind or transport specific substances in the blood, within the cell, or across cell membranes."
+        },
+        {
+            "start": "molecular_function",
+            "type": "interacts_with",
+            "end": "gene_or_protein",
+            "description": "A gene/protein has a specific molecular function"
+        },
+        {
+            "start": "molecular_function",
+            "type": "interacts_with",
+            "end": "exposure",
+            "description": "A gene/protein has a specific molecular function"
+        },
+        {
+            "start": "molecular_function",
+            "type": "parent_child",
+            "end": "molecular_function",
+            "description": "\"is a \" relation: Indicates that one entity is a subtype or specific instance of another."
+        },
+        {
+            "start": "drug",
+            "type": "has",
+            "end": "approval_status",
+            "description": "Possible values for approval_status: approved, investigational, vet_approved, experimental, withdrawn, nutraceutical, illicit"
+        },
+        {
+            "start": "drug",
+            "type": "target",
+            "end": "gene_or_protein",
+            "description": "A material entity, such as native (gene product) protein, protein complex, microorganism, DNA , etc., that physically interacts with a therapeutic or prophylactic drug (with some binding affinity) and where this physical interaction is (at least partially) the cause of a (detectable) clinical effect."
+        },
+        {
+            "start": "drug",
+            "type": "synergistic_interaction",
+            "end": "drug",
+            "description": "When two drugs interact in a way that their combined effect is greater than the sum of their individual effects."
+        },
+        {
+            "start": "drug",
+            "type": "transporter",
+            "end": "gene_or_protein",
+            "description": "Integral membrane proteins that transport molecules or ions into or out of the cell or compartment.\nA protein that is involved in the directed movement of substances into, out of, within or between cells.\n \"transport protein\" is an umbrella term for e.g. carrier proteins, channel proteins and protein pumps"
+        },
+        {
+            "start": "drug",
+            "type": "indication",
+            "end": "disease",
+            "description": "Description or common names of diseases that the drug is used to treat."
+        },
+        {
+            "start": "drug",
+            "type": "is_a",
+            "end": "category",
+            "description": "If we are looking for a specific type of drug that 'is a' or 'can be categorized as', we are looking for this relationship"
+        },
+        {
+            "start": "drug",
+            "type": "off_label_use",
+            "end": "disease",
+            "description": "The use of an FDA-approved device, drug, or treatment for a purpose other than that for which it was approved."
+        },
+        {
+            "start": "drug",
+            "type": "contraindication",
+            "end": "disease",
+            "description": "A symptom or medical condition that makes a particular treatment or procedure inadvisable because a person is likely to have a bad reaction.[NCIT]\n'A contraindication is a disposition that increases the risk of harm involved in using a particular drug, carrying out a medical procedure, or engaging in a particular activity such that the risk of harm exceeds a threshold. An contraindication serves as a reason to withhold a certain medical treatment."
+        },
+        {
+            "start": "drug",
+            "type": "side_effect",
+            "end": "effect_or_phenotype",
+            "description": "The term was used in various ways in the past, to describe unintended effects of medical intervention, usually negative (unfavourable), but also positive (favourable) ones. It is recommended that this term no longer be used and particularly should not be regarded as synonymous with adverse event or adverse reaction."
+        },
+        {
+            "start": "drug",
+            "type": "enzyme",
+            "end": "gene_or_protein",
+            "description": "Gene/protein encodes an enzyme that metabolizes the drug. \nDrug Metabolism: A series of chemical modifications of a drug compound by enzymatic activity that make the substrate (drug) more water soluble to allow its clearance from the body. Drug metabolism occurs in two phases: Phase I (biotransformation) involves oxidation, hydroxylation reduction, and hydrolysis. Phase II (conjugation) involves synthesis and conjugation."
+        },
+        {
+            "start": "drug",
+            "type": "carrier",
+            "end": "gene_or_protein",
+            "description": "Proteins that bind or transport specific substances in the blood, within the cell, or across cell membranes."
+        },
+        {
+            "start": "drug",
+            "type": "associated_with",
+            "end": "disease",
+            "description": "General relationship, doesn't exist in KG but can be inferred from other relationships"
+        },
+        {
+            "start": "disease",
+            "type": "associated_with",
+            "end": "effect_or_phenotype",
+            "description": "General relationship, doesn't exist in KG but can be inferred from other relationships"
+        }
+    ],
+    "metadata": {
+        "constraint": [],
+        "index": []
+    },
+    "node_types": [
+        {
+            "type": "anatomy",
+            "description": "Biological anatomical structures"
+        },
+        {
+            "type": "approval_status",
+            "description": "A label act as property for regulatory approval state of a drug (approved, investigational, withdrawn, etc.)"
+        },
+        {
+            "type": "biological_process",
+            "description": "GO biological processes describing functional biological events"
+        },
+        {
+            "type": "category",
+            "description": "Drug classification or grouping category"
+        },
+        {
+            "type": "cellular_component",
+            "description": "GO cellular component ontology describing subcellular structures"
+        },
+        {
+            "type": "disease",
+            "description": "Disease entities from MONDO or grouped biomedical sources"
+        },
+        {
+            "type": "drug",
+            "description": "Drug and chemical compounds from DrugBank"
+        },
+        {
+            "type": "effect_or_phenotype",
+            "description": "Phenotypic traits and HPO effects associated with diseases or drugs"
+        },
+        {
+            "type": "exposure",
+            "description": "Chemical or environmental exposures from CTD database"
+        },
+        {
+            "type": "gene_or_protein",
+            "description": "Genes and proteins from NCBI or UniProt"
+        },
+        {
+            "type": "molecular_function",
+            "description": "GO molecular function ontology describing biochemical activities"
+        },
+        {
+            "type": "pathway",
+            "description": "Biological pathways from Reactome"
+        }
+    ],
+    "node_object_props": {
+        "drug": [
+            {
+                "label": "approval_status",
+                "relationship": "has",
+                "description": "approval status"
+            }
+        ]
+    },
+    "relationship_types": [
+        "associated_with",
+        "carrier",
+        "contraindication",
+        "enzyme",
+        "expression_absent",
+        "expression_present",
+        "has",
+        "indication",
+        "interacts_with",
+        "is_a",
+        "linked_to",
+        "off_label_use",
+        "parent_child",
+        "phenotype_absent",
+        "phenotype_present",
+        "ppi",
+        "side_effect",
+        "synergistic_interaction",
+        "target",
+        "transporter"
+    ],
+    "ontology": {
+        "relationship_hierarchy": {
+            "indication": "associated_with",
+            "contraindication": "associated_with",
+            "off_label_use": "associated_with",
+            "phenotype_present": "associated_with"
+        }
+    }
+}

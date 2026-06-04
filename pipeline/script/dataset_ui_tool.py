@@ -7,9 +7,9 @@ from pathlib import Path
 from tkinter import messagebox, ttk
 from typing import Any, Dict, List, Optional, cast
 
-from pipeline.nodes.entity_extraction import entity_extraction_node
+from nodes.entity_extraction import entity_extraction_node
 from nodes.entity_linking import entity_linking_node
-from pipeline.nodes.cypher_generation import cypher_generation_node
+from nodes.cypher_generation import cypher_generation_node
 from script.dataset_table_view import DatasetTableView
 from services.graph.utils import get_graph, validate_cypher
 from pipeline_state import GraphState

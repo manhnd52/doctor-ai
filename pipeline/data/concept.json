@@ -1,0 +1,49 @@
+[
+  {
+    "name": "novel_target_gene",
+    "start": "gene",
+    "end": "disease",
+    "alias": [
+      "novel target",
+      "novel targets"
+    ],
+    "description": "Gene associated with disease but not targeted by any drug",
+    "patterns": [
+      "(d:disease)-[:associated_with]->(g:gene_or_protein)",
+      "NOT (g)<-[:target]-(:drug)"
+    ]
+  },
+  {
+    "name": "known_target",
+    "start": "gene",
+    "end": "disease",
+    "alias": [
+      "known target",
+      "known targets"
+    ],
+    "description": "Gene is targeted by at least one drug indicated for disease",
+    "patterns": [
+      "(g:gene_or_protein)-[:target]->(d:drug)",
+      "(d:drug)-[:indication]->(dis:disease)"
+    ]
+  },
+  {
+    "name": "permeate_cell_membranes",
+    "start": "drug",
+    "end": "drug",
+    "alias": [
+      "permeate cell membranes",
+      "permeate cell membrane",
+      "permate cell membranes",
+      "permate cell membrane",
+      "permeating cell membranes",
+      "permeates cell membranes",
+      "permeate the cell membrane",
+      "permeate the cell membranes"
+    ],
+    "description": "Drug that can permeate cell membranes (tpsa <= 140.0)",
+    "patterns": [
+      "(d:drug) WHERE d.tpsa IS NOT NULL AND d.tpsa <= 140.0"
+    ]
+  }
+]
