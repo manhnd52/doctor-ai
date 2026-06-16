@@ -3,7 +3,9 @@ from config import settings
 
 def entity_linking_node(state):
     linked_entities = []
-    entities = state.get("entities", [])
+    entities = state.get("entities") or []
+    if not isinstance(entities, list):
+        entities = []
 
     def _find_match(searched, label):
         for result in searched:
@@ -17,6 +19,8 @@ def entity_linking_node(state):
         return None
 
     for e in entities:
+        if not isinstance(e, dict):
+            continue
         entity_text = e.get("text")
         label = e.get("label")
 
@@ -26,7 +30,8 @@ def entity_linking_node(state):
 
         # Fallback: Remove extra spaces and lowercase then search again
         if not linked_entity:
-            print(f"[DEBUG] No match found for '{entity_text}' with label '{label}'. Retrying with cleaned text...")
+            if settings.DEBUG:
+                print(f"[DEBUG] No match found for '{entity_text}' with label '{label}'. Retrying with cleaned text...")
             searched = search_entity(entity_text.replace(" ", "").lower(), top_k=3, threshold=1.0)
             if searched:
                 linked_entity = _find_match(searched, label)

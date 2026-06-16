@@ -58,6 +58,9 @@ Respond with a Cypher statement only!
 
 Do not respond to any questions that might ask anything else than for you to construct a Cypher statement.
 
+Note on Neosemantics (n10s) Inference Queries:
+If the Cypher statement uses Neosemantics inference (via `CALL n10s.inference.getRels(...) YIELD rel, node`), it is the correct way to query hierarchical relationships (e.g. `associated_with`). Keep this structure, do not rewrite it to use standard relationship syntax, and do not treat `n10s.inference.getRels` or its arguments as errors.
+
 The question is:
 {question}
 

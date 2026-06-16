@@ -21,12 +21,22 @@ def tripple_extraction_node(state):
 
 def extract_triples(question: str) -> List[Dict[str, Any]]:
     predicate_descriptions = get_predicate_descriptions()
+    
+    # Format aliases from the same_as fields in predicate descriptions
+    aliases = []
+    for rel in predicate_descriptions:
+        if "same_as" in rel:
+            for syn in rel["same_as"]:
+                aliases.append(f"- {syn} -> {rel['predicate']}")
+    alias_str = "\n".join(aliases)
+
     model = get_model()
     structured_model = model.with_structured_output(TripleExtractionResult)
     chain = prompt | structured_model
     res = chain.invoke({
         "question": question,
-        "predicate_descriptions": predicate_descriptions
+        "predicate_descriptions": predicate_descriptions,
+        "alias": alias_str
     })
 
     if isinstance(res, TripleExtractionResult):
@@ -69,13 +79,14 @@ class TripleExtractionResult(BaseModel):
     )
 
 system_prompt = """
-You are a relationship extractor for a Neo4j graph.
+You are a triple extractor for a Neo4j graph.
 
 Task: From a natural language question, extract valid relationships between entities using the given predicate schema.
 
 Input:
 - question: natural language question
 - predicate_descriptions: list of valid relationships in the graph
+- alias: aliases for relationships in the graph
 
 Output:
 - List of relationships with:
@@ -84,11 +95,11 @@ Output:
   - object: target node with text and label
 
 Rules:
-- Only extract relationships that are explicitly stated in the text. DO NOT infer, guess, or complete missing information using external knowledge.
-- Only use predicates from predicate_descriptions.
+- Only extract relationships that are stated in the question.
+- Only use predicates from predicate_descriptions. You can match relationships using their aliases listed in the alias.
 - Do not invent new relationships.
 - Do NOT answer the question.
-- If uncertain, please '?' the part you are unsure about.
+- If you don't recognize any relationship in the question, return empty list.
 
 Example:
 Input:
@@ -124,6 +135,11 @@ Predicate Descriptions:
 <predicate_descriptions>
 {predicate_descriptions}
 </predicate_descriptions>
+
+Alias:
+<alias>
+{alias}
+</alias>
 """
 
 prompt = ChatPromptTemplate.from_messages(

@@ -10,8 +10,13 @@ def cypher_validation_node(state):
     query = state.get("cypher", "")
     errors = []
     mapping_errors = []
-
-    is_valid, metadata_list = validate_cypher(query)
+    
+    is_referencing = "n10s" in query
+    
+    if not is_referencing:
+        is_valid, metadata_list = validate_cypher(query)
+    else:
+        is_valid, metadata_list = True, []
 
     if metadata_list:
         for item in metadata_list:
@@ -22,7 +27,7 @@ def cypher_validation_node(state):
     llm_output = validate_cypher_chain.invoke(
         {   
             "question": state.get("question"),
-            "schema": get_formatted_schema(),
+            "schema": state.get("pruned_schema", ""),
             "cypher": state.get("cypher"),
             "entities": state.get("entities", []),
             "triples": state.get("triples", [])
@@ -34,34 +39,16 @@ def cypher_validation_node(state):
     if llm_output.errors:
         errors.extend([f"code=llm-gen; description={e}" for e in llm_output.errors])
 
-    if llm_output.filters:
-        for filter in llm_output.filters:
-            # Do mapping only for string values
-            if (
-                not [
-                    prop
-                    for prop in get_schema()["node_props"][
-                        filter.node_label
-                    ]
-                    if prop["property"] == filter.property_key
-                ][0]["type"]
-                == "STRING"
-            ):
-                continue
-            mapping = get_graph().query(
-                f"MATCH (n:{filter.node_label}) WHERE toLower(n.`{filter.property_key}`) = toLower($value) RETURN 'yes' LIMIT 1",
-                {"value": filter.property_value},
-            )
-            if not mapping:
-                mapping_errors.append(
-                    f"Missing value mapping for {filter.node_label} on property {filter.property_key} with value {filter.property_value}"
-                )
-    if mapping_errors:
-        next_action = "end" 
-    elif errors:
+    if errors:
         if settings.DEBUG:
             print("[DEBUG] Validation errors found:", errors)
-        next_action = "cypher_correction"
+        attemp = state.get("cypher_gen_attempt", 0)
+        if attemp >= settings.ATTEMPT_THRESHOLD:
+            if settings.DEBUG:
+                print(f"[DEBUG] Attempt count {attemp} reached/exceeded threshold {settings.ATTEMPT_THRESHOLD}. Proceeding straight to execution with errors.")
+            next_action = "query_execution"
+        else:
+            next_action = "cypher_correction"
     else:
         next_action = "query_execution"
 
@@ -81,7 +68,7 @@ You are a Cypher expert reviewing a statement written by a junior developer.
 """
 
 validate_cypher_user = """You must check the following:
-* Are there any syntax errors in the Cypher statement?
+* Are there any syntax errors in the Cypher or n10s statement?
 * Are there any missing or undefined variables in the Cypher statement?
 * Are any node labels missing from the schema?
 * Are any relationship types missing from the schema?
@@ -91,6 +78,15 @@ validate_cypher_user = """You must check the following:
 
 Notice:
 * You DON'T NEED TO CHECK THE DIRECTION of the relationships because it is checked before then the current Cypher's direction is valid.
+* Note on Neosemantics (n10s) Inference Queries: Queries using Neosemantics inference (via `CALL n10s.inference.getRels(startNode, 'rel_type', {{relDirection: ...}}) YIELD rel, node`) are completely valid and expected for hierarchical/ontology relationships (like `associated_with`). DO NOT flag the procedure call `n10s.inference.getRels` or its arguments as errors or missing from the schema.
+* If the query have index, and that index matching with the entity, the cypher IS OKE. PLEASE IGNORE.
+Example: 
+ENTITIES: 
+[{{"text": "tricuspid valve atresia", "label": "", "index": 30396}}]
+CYPHER: MATCH (n {{index: 30396}})-[:associated_with]->() RETURN n.name
+VALIDATE RESULT: [] // OK
+* IF the query have index but don't have label, it's OKAY.
+* Don't feedback about RETURN type, property type, or data format in the result, it will be handled in the execution step.
 
 Examples of good errors:
 * Label (:Foo) does not exist, did you mean (:Bar)?
@@ -109,11 +105,7 @@ The Cypher statement is:
 
 Extracted Entities (the entities that are extracted from the question and their index used in the Cypher statement) is:
 {entities}
-
-Extracted Triples (the triples that are extracted from the question) is:
-{triples}
-
-Make sure you don't make any mistakes!"""
+"""
 
 validate_cypher_prompt = ChatPromptTemplate.from_messages(
     [

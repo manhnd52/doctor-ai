@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import KnowledgeContext from "./KnowledgeContext"
 import { useUIStore } from "../store/uiStore"
 import { useUserStore } from "../store/userStore"
+import { useChatStore } from "../store/chatStore"
 
 export default function Header() {
   const [isMenuOpen, setMenuOpen] = useState(false)
@@ -18,6 +19,10 @@ export default function Header() {
 
   const { logout, user } = useUserStore()
   const navigate = useNavigate()
+
+  const { activeSessionId, sessions } = useChatStore()
+  const activeSession = sessions.find((s) => s.id === activeSessionId)
+  const knowledgeGraphName = activeSession?.knowledge_graph?.name || "Show KG"
 
   return (
     <>
@@ -45,7 +50,7 @@ export default function Header() {
               className={`h-2 w-2 rounded-full ${"bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
                 }`}
             />
-            <span>Show KG</span>
+            <span>{knowledgeGraphName}</span>
           </button>
 
           {/* User profile & Logout */}

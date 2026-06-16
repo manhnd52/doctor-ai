@@ -105,36 +105,27 @@ def evaluate_sample_with_tuple_in_label(
     indices = [f"index{i}" for i in range(tuple_size)]
     name_indices = [f"name{i}" for i in range(tuple_size)]
     expected_values_per_pos = {}
+
     for index_key, name_key in zip(indices, name_indices):
-        ids = [node[index_key] for node in expected_nodes if index_key in node]
-        expected_values_per_pos[index_key] = set()
-        if name_key in expected_nodes[0]:
-            expected_values_per_pos[index_key] = [
-                node[name_key].strip().lower()
-                for node in expected_nodes
-                if name_key in node and isinstance(node[name_key], str)
-            ]
-        else:
-            expected_values_per_pos[index_key] = [
-                name.strip().lower()
-                for name in query_node_names(ids)
-                if isinstance(name, str)
-            ]
+        expected_values_per_pos[index_key] = []
+        for node in expected_nodes:
+            val = node.get(name_key)
+            expected_values_per_pos[index_key].append(
+                val.strip().lower() if isinstance(val, str) else ""
+            )
 
     best_result_keys = {}
     for index_key, expected_values in expected_values_per_pos.items(): 
-        # .items is used to iterate over both the index_key and its corresponding expected_values
-        # Example: index_key = "index0", expected_values = ["hunger", "increased thirst", ...]
-        per_key_scores = _get_scores_per_key(expected_values, result)
+        filtered_expected = [val for val in expected_values if val]
+        per_key_scores = _get_scores_per_key(filtered_expected, result)
         best_result_keys[index_key] = max(per_key_scores, key=lambda result_key: per_key_scores[result_key][0])
 
-    expected_tuples = set(
-        tuple(
-            expected_values_per_pos[index_key][row]
-            for index_key in indices
-        )
-        for row in range(min(len(expected_nodes), *(len(expected_values_per_pos[index_key]) for index_key in indices)))
-    )
+    expected_tuples = set()
+    for row in range(len(expected_nodes)):
+        tuple_values = []
+        for index_key in indices:
+            tuple_values.append(expected_values_per_pos[index_key][row])
+        expected_tuples.add(tuple(tuple_values))
 
     result_tuples = set()
     for row in result:
@@ -191,7 +182,7 @@ def _compute_score_for_key(
     if len(entries) == 0:
         return 0.0, 0.0, 0.0
 
-    expected = {str(value).strip().lower() for value in expected_values if value is not None}
+    expected = {str(value).strip().lower() for value in expected_values}
     if len(expected) == 0:
         return 0.0, 0.0, 0.0
 
@@ -208,7 +199,6 @@ def _normalize_single_value(value: Any) -> str:
     if value is None:
         return ""
     return str(value).strip().lower()
-
 
 
 if __name__ == "__main__":
@@ -256,6 +246,19 @@ if __name__ == "__main__":
     query_result = [
         {"symptom1": "Hunger", "symptom2": "Increased thirst"},
         {"symptom1": "Frequent urination", "symptom2": "Weight will be loss"},
+    ]
+
+    print(evaluate_sample_with_tuple_in_label(expected_nodes, query_result))
+
+    print("Test 05 (Both expected and query results have null): ")
+    expected_nodes = [
+        {"index0": 1, "index1": 2, "name0": "Drug A", "name1": None},
+        {"index0": 3, "index1": 4, "name0": "Drug C", "name1": "alz65"}
+    ]
+
+    query_result = [
+        {"drug": "Drug A", "target": None},
+        {"drug": "Drug C", "target": "alz65"}
     ]
 
     print(evaluate_sample_with_tuple_in_label(expected_nodes, query_result))

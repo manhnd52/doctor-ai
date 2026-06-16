@@ -4,7 +4,8 @@ from pydantic import BaseModel, Field
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from services.ner.ner_service import NerService
-    
+from services.llm_service import get_model
+
 class Entity(BaseModel):
     text: str = Field(
         description="The exact text span from the input sentence that represents the entity."
@@ -29,10 +30,8 @@ class LlmNerService(NerService):
     ):
         super().__init__(node_types, rel_types)
 
-        self.llm = ChatOpenAI(
-            model=model,
-            temperature=temperature,
-        ).with_structured_output(KGQueryIR)
+        model = get_model()
+        self.llm = model.with_structured_output(KGQueryIR)
 
         self.prompt = ChatPromptTemplate.from_messages([
             (
@@ -46,9 +45,8 @@ class LlmNerService(NerService):
             "* Avoid duplicates.\n"
 
             "Allowed Labels:\n{labels}\n\n"
-
-            "Question:\n{text}\n\n"
-            )
+            ),
+            ("user", "Extract entities from this question:\n{text}"),
             ]
         )
 

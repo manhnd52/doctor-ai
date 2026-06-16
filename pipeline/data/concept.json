@@ -45,5 +45,18 @@
     "patterns": [
       "(d:drug) WHERE d.tpsa IS NOT NULL AND d.tpsa <= 140.0"
     ]
+  },
+  {
+    "name": "issues_of_drug",
+    "start": "drug",
+    "end": "effect_or_phenotype",
+    "alias": [
+      "issues",
+      "issues of"
+    ],
+    "description": "Effect or phenotype associated with drug",
+    "patterns": [
+      "(d:drug)-[:side_effect]->(e:effect_or_phenotype)"
+    ]
   }
 ]

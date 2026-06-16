@@ -14,15 +14,80 @@ def cypher_generation_node(state : GraphState):
     attemp = state.get("cypher_gen_attempt", 0)
 
     if (attemp > settings.ATTEMPT_THRESHOLD):
+        if settings.DEBUG:
+            print(f"[DEBUG] Attempt count {attemp} exceeded threshold {settings.ATTEMPT_THRESHOLD}. Proceeding straight to execution.")
         return {
-            "errors": [("Cypher Generation", f"Failed to generate valid Cypher after {attemp} attempts.")],
+            "cypher": state.get("cypher", ""),
+            "steps": ["cypher_generation"]
         }
     
+    entities = state.get("linked_entities") or []
+    triples = state.get("triples") or []
+    concepts = state.get("concepts") or []
+
+    keywords = set()
+    for entity in entities:
+        if isinstance(entity, dict):
+            keywords.add(entity.get("label", ""))
+    for triple in triples:
+        if isinstance(triple, dict):
+            subject = triple.get("subject")
+            obj = triple.get("object")
+            if isinstance(subject, dict):
+                keywords.add(subject.get("label", ""))
+            if isinstance(obj, dict):
+                keywords.add(obj.get("label", ""))
+            keywords.add(triple.get("predicate", ""))
+    for concept in concepts:
+        if isinstance(concept, str):
+            keywords.add(concept)
+
+    if settings.DEBUG:
+        print("[DEBUG] Keywords: ", keywords)
+
+    pruned_schema = get_prune_schema_by_keywords(keywords)
+
+    inference_relationships = state.get("inference_relationships", [])
+    inference_hint = ""
+    if inference_relationships:
+        inference_hint = f"""
+  ### [CRITICAL ALERT] Neosemantics (n10s) Inference Required:
+  The relationship(s) {inference_relationships} are parent properties in the ontology and do NOT exist directly in the database.
+  You MUST use `n10s.inference.getRels` to query them.
+  
+  Syntax rules for using n10s.inference.getRels:
+  - For OUTGOING relationship from node `n` to node `m` via relationship type `R` (e.g., `(n)-[:R]->(m)`):
+    MATCH (n {{index: <index_value>}})
+    CALL n10s.inference.getRels(n, 'R', {{relDirection: 'OUTGOING'}}) YIELD rel, node
+    MATCH (m:<Label>) WHERE m = node
+    RETURN DISTINCT m.name
+  - For INCOMING relationship from node `m` to node `n` via relationship type `R` (e.g., `(n)<-[:R]-(m)`):
+    MATCH (n {{index: <index_value>}})
+    CALL n10s.inference.getRels(n, 'R', {{relDirection: 'INCOMING'}}) YIELD rel, node
+    MATCH (m:<Label>) WHERE m = node
+    RETURN DISTINCT m.name
+  - For UNDIRECTED or BOTH directions:
+    MATCH (n {{index: <index_value>}})
+    CALL n10s.inference.getRels(n, 'R', {{relDirection: 'BOTH'}}) YIELD rel, node
+    MATCH (m:<Label>) WHERE m = node
+    RETURN DISTINCT m.name
+
+  Example: "Which drugs are associated with diabetes?"
+  - Input Entities: `[[{{"text": "diabetes", "label": "disease", "index": 123}}]]`
+  - Extracted Triple: `[[{{"subject": {{"text": "diabetes", "label": "disease"}}, "predicate": "associated_with", "object": {{"text": "?", "label": "drug"}}}}]]`
+  - Since `associated_with` is a parent relationship in the ontology (not directly stored in the graph for drug-disease), use n10s:
+    MATCH (d {{index: 123}})
+    CALL n10s.inference.getRels(d, 'associated_with', {{relDirection: 'INCOMING'}}) YIELD rel, node
+    MATCH (t:drug) WHERE t = node
+    RETURN t.name
+"""
+
     res = generate_cypher(
         question=state.get("question", ""),
-        entities=state.get("linked_entities", []),
-        triples=state.get("triples", []),
-        concepts=state.get("concepts", [])
+        entities=entities,
+        triples=triples,
+        pruned_schema=pruned_schema,
+        inference_hint=inference_hint
     )
 
     if settings.DEBUG:
@@ -30,6 +95,7 @@ def cypher_generation_node(state : GraphState):
 
     return {
         "cypher": clean_cypher(res.get("cypher", "")), 
+        "pruned_schema": pruned_schema,
         "cypher_gen_attempt": attemp + 1,
         "metrics": {
             **state.get("metrics", {}),
@@ -56,26 +122,11 @@ system_prompt_triple =  """
   If something is not explicitly present in the schema or provided inputs,
   DO NOT use it.
 
-  # Objective
-
-  Given:
-  - a natural language question
-  - the database schema
-  - resolved graph entities
-  - candidate labels
-  - candidate relationships
-
-  Generate ONE valid Cypher query that best answers the question.
-
   # Database Context
 
   <database_schema>
   {schema}
   </database_schema>
-
-  <predicate_descriptions>
-  {predicate_descriptions}
-  </predicate_descriptions>
 
   <resolved_entities>
   These are REAL nodes already matched in the graph.
@@ -84,7 +135,7 @@ system_prompt_triple =  """
   </resolved_entities>
 
   <extracted_triples>
-  These are relationships extracted from the question.
+  These are relationships extracted from the question. 
   {triples}
   </extracted_triples>
 
@@ -97,69 +148,33 @@ system_prompt_triple =  """
   These entities represent already resolved graph nodes and should be treated
   as reliable anchors in the query.
 
-  2. Intent-Driven Query Construction
-  First determine the core intent of the question.
-  Examples:
-  - retrieving properties
-  - finding related nodes
-  - counting nodes
-  - verifying existence
-  - listing results
-  Use only the entities and schema elements necessary to answer the question.
-  Do NOT force all entities into the query.
-
-  3. Label Usage
-  Use ONLY labels that exist in the schema.
-  If a label contains spaces, wrap it in backticks (`).
-
-  4. Relationship Usage
-  Use ONLY relationship types defined in the schema.
-  Never invent relationships.
-
-  5. Query Simplicity
-  The query must be minimal and readable.
-  Avoid:
-  - unnecessary MATCH
-  - unnecessary OPTIONAL MATCH
-  - deep nesting
-  - redundant patterns
-
-  6. Answer Type Mapping
+  2. Answer Type Mapping
   Yes/No question  
   → return a boolean named `value`
   Aggregation (COUNT, SUM, AVG, MIN, MAX)  
   → return a single value named `value`
   Property retrieval  
   → return the requested properties
-  List question  
-  → return multiple rows (do NOT collect)
+  A list of nodes, edges, or properties retrival → DON'T use collect()
+  
+  3. When a question compares counts of relationships   
+      (e.g. more, fewer, most, least, higher than, lower than),
+      assume absent relationships contribute a count of zero unless 
+      the question explicitly requires the relationship to exist.
 
-  7. Ambiguity Handling
-  If the question is ambiguous:
-  Generate a query that retrieves the most relevant
-  information based strictly on:
-  - grounded entities
-  - schema structure
-  - candidate labels
-  - candidate relationships
-  Never guess missing schema elements.
-
-  8. Schema Safety
-  The generated query MUST be valid Cypher.
-  Only use:
-  - labels defined in the schema
-  - relationships defined in the schema
-  - properties defined in the schema
-
+      Therefore prefer OPTIONAL MATCH over MATCH for counted relationships.
+      
   # Output Format
   Return a structured object with EXACTLY these fields:
   - cypher: string
+
+  {inference_hint}
 """
 
 prompt = ChatPromptTemplate.from_messages(
     [
         ("system", system_prompt_triple),
-        ("human", "{question}")
+        ("human", "Question: {question}\n")
     ]
 )
 
@@ -170,26 +185,13 @@ class OutputSchema(BaseModel):
 def generate_cypher(question, 
                     entities,
                     triples = [],
-                    concepts = []):
+                    pruned_schema = {},
+                    inference_hint = ""):
 
     model = get_model()
     model = model.with_structured_output(OutputSchema)
     chain = prompt | model
     
-    keywords = set()
-    for entity in entities:
-        keywords.add(entity.get("label", ""))
-    for triple in triples:
-        keywords.add(triple.get("subject", "").get("label", ""))
-        keywords.add(triple.get("object", "").get("label", ""))
-        keywords.add(triple.get("predicate", ""))
-    for concept in concepts:
-        keywords.add(concept)
-
-    if settings.DEBUG:
-        print("[DEBUG] Keywords: ", keywords)
-
-    pruned_schema = get_prune_schema_by_keywords(keywords)
 
     if settings.DEBUG:
         import sys
@@ -198,12 +200,13 @@ def generate_cypher(question,
         except UnicodeEncodeError:
             safe_schema = pruned_schema.encode(sys.stdout.encoding or 'utf-8', errors='replace').decode(sys.stdout.encoding or 'utf-8')
             print("[DEBUG] Pruned schema (safe): ", safe_schema)
+            
     response = chain.invoke({
         "question": question,
         "schema": pruned_schema,
-        "predicate_descriptions": get_predicate_descriptions(),
         "entities": entities,
         "triples": triples,
+        "inference_hint": inference_hint,
     })
     if isinstance(response, OutputSchema):
         return response.model_dump()

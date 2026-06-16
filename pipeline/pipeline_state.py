@@ -37,9 +37,11 @@ class GraphState(TypedDict, total=False):
     
     # step_02_entity_linking
     linked_entities: List[Dict]
+    inference_relationships: List[str] # parent rel has child rel
     
     # step_03_cypher_generation
     cypher: str
+    pruned_schema: str
 
     # step_04_query_execution
     query_result: Any

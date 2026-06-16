@@ -4,6 +4,7 @@ services:
   neo4j:
     build:
       context: ./neo4j
+    mem_limit: 2g
     container_name: neo4j
     ports:
       - "7474:7474" # HTTP

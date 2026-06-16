@@ -327,6 +327,9 @@
         {
             "start": "disease",
             "type": "indication",
+            "same_as": [
+                "treated_by"
+            ],
             "end": "drug",
             "description": "Description or common names of diseases that the drug is used to treat."
         },
@@ -597,6 +600,9 @@
         {
             "start": "drug",
             "type": "indication",
+            "same_as": [
+                "treats"
+            ],
             "end": "disease",
             "description": "Description or common names of diseases that the drug is used to treat."
         },
@@ -639,12 +645,31 @@
         {
             "start": "drug",
             "type": "associated_with",
+            "children": [
+                "indication",
+                "contraindication",
+                "off_label_use"
+            ],
             "end": "disease",
             "description": "General relationship, doesn't exist in KG but can be inferred from other relationships"
         },
         {
             "start": "disease",
             "type": "associated_with",
+            "children": [
+                "indication",
+                "contraindication",
+                "off_label_use"
+            ],
+            "end": "drug",
+            "description": "General relationship, doesn't exist in KG but can be inferred from other relationships"
+        },
+        {
+            "start": "disease",
+            "type": "associated_with",
+            "children": [
+                "phenotype_present"
+            ],
             "end": "effect_or_phenotype",
             "description": "General relationship, doesn't exist in KG but can be inferred from other relationships"
         }

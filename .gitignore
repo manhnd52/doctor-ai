@@ -53,3 +53,5 @@ neo4j/backup/*
 # Pipeline Specific
 pipeline/cache/
 pipeline/outputs/
+docs/bao_cao_phuong_phap_de_xuat.md
+docs/thesis_preprocess_section.md

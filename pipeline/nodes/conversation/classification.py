@@ -2,6 +2,7 @@ from services.llm_service import get_model
 from pipeline_state import GraphState
 from pydantic import BaseModel, Field
 from typing import Literal
+from config import settings
 
 class ClassifyResult(BaseModel): 
     type: Literal["PIPELINE", "LLM"]
@@ -27,7 +28,8 @@ def classify_question_node(state : GraphState):
         response = ClassifyResult.model_validate(response)
         question_type = response.type
     except Exception as e:
-        print(f"[DEBUG] Classification failed: {e}, defaulting to LLM")
+        if settings.DEBUG:
+            print(f"[DEBUG] Classification failed: {e}, defaulting to LLM")
         question_type = "LLM"
 
     return {
