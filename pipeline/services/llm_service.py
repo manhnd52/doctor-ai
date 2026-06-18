@@ -1,7 +1,6 @@
 from typing import Optional
 from langchain.chat_models import BaseChatModel, init_chat_model
 from langchain_openai import ChatOpenAI
-from langchain_gradient import ChatGradient  
 
 model = init_chat_model("gpt-5-nano", temperature=0.0)
 
