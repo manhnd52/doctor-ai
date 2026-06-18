@@ -15,11 +15,6 @@ digital_ocean_url = "https://inference.do-ai.run/v1/"
 #     base_url=inference_server_url,
 # )
 
-digital_ocean_model = ChatGradient(
-    model="deepseek-r1-distill-llama-70b",
-    api_key="doo_v1_9d6a850735e992361dadb0716f20f7b968d9d33a553365f450780c9d5e7372ba"
-)
-
 def get_model():
     return model
     

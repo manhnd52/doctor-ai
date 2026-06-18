@@ -10,12 +10,19 @@ import warnings
 from openpyxl import Workbook
 
 from data.utils import get_sample_with_id, loadEvaluationSamples
-from graph_builder import build_nlp_subgraph
+from graph_builder import build_nlp_subgraph, build_baseline_subgraph
 from helper import pretty_print
 from pipeline_state import GraphState
+import sys
 
-graph = build_nlp_subgraph(evaluate=True)
-graph_with_out_evaluation = build_nlp_subgraph(evaluate=False)
+use_baseline = "--baseline" in sys.argv or "-baseline" in sys.argv
+
+if use_baseline:
+    graph = build_baseline_subgraph(evaluate=True)
+    graph_with_out_evaluation = build_baseline_subgraph(evaluate=False)
+else:
+    graph = build_nlp_subgraph(evaluate=True)
+    graph_with_out_evaluation = build_nlp_subgraph(evaluate=False)
 
 warnings.filterwarnings(
     "ignore",
@@ -333,6 +340,12 @@ def main() -> None:
         "--debug",
         action="store_true",
         help="Enable debug mode with more verbose output",
+    )
+
+    parser.add_argument(
+        "--baseline",
+        action="store_true",
+        help="Use the LLM-only schema baseline",
     )
 
     args = parser.parse_args()

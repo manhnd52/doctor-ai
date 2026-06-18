@@ -14,7 +14,7 @@ services:
     volumes:
       - ./neo4j/data:/data
       - ./neo4j/logs:/logs
-      - ./neo4j/backup:/backup:ro
+      - ./neo4j/backup:/backup
       - ./neo4j/init:/var/lib/neo4j/import/init
       - ./neo4j/conf:/var/lib/neo4j/conf
       - ./neo4j/start.sh:/start.sh:ro

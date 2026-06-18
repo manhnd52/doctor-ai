@@ -84,3 +84,37 @@ def build_graph(evaluate=False):
     builder.add_edge("answer_generation", END)
 
     return builder.compile()
+
+def build_baseline_subgraph(evaluate=False):
+    builder = StateGraph(GraphState)
+
+    builder.add_node("baseline_cypher_generation", baseline_cypher_generation_node)
+    builder.add_node("query_execution", query_execution_node)
+    
+    # flow
+    builder.add_edge(START, "baseline_cypher_generation")
+    builder.add_edge("baseline_cypher_generation", "query_execution")
+
+    if evaluate:
+        builder.add_node("evaluation", evaluation_node)
+        builder.add_edge("query_execution", "evaluation")
+        builder.add_edge("evaluation", END)
+    else:
+        builder.add_edge("query_execution", END)
+
+    return builder.compile()
+
+def build_baseline_graph(evaluate=False):
+    builder = StateGraph(GraphState)
+
+    # subgraph node
+    baseline_subgraph = build_baseline_subgraph(evaluate=evaluate)
+    builder.add_node("nlp_pipeline", baseline_subgraph)
+    builder.add_node("answer_generation", answer_generation_node)
+
+    # flow
+    builder.add_edge(START, "nlp_pipeline")
+    builder.add_edge("nlp_pipeline", "answer_generation")
+    builder.add_edge("answer_generation", END)
+
+    return builder.compile()
