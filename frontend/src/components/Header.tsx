@@ -50,7 +50,7 @@ export default function Header() {
               className={`h-2 w-2 rounded-full ${"bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
                 }`}
             />
-            <span>{knowledgeGraphName}</span>
+            <span className="truncate max-w-[80px] sm:max-w-[120px]">{knowledgeGraphName}</span>
           </button>
 
           {/* User profile & Logout */}

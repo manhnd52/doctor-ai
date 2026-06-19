@@ -214,10 +214,17 @@ export default function Chatbot() {
 
       {/* 3. Right Sidebar (Inspector) */}
       {isInspectorOpen && (selectedPipelineRun || (sending_message && streamingPipelineRun)) && (
-        <Inspector
-          pipelineRun={sending_message && streamingPipelineRun ? streamingPipelineRun : selectedPipelineRun}
-          onClose={() => setInspectorOpen(false)}
-        />
+        <>
+          {/* Inspector Backdrop for Mobile */}
+          <div
+            className="fixed inset-0 z-30 bg-black/40 backdrop-blur-[2px] md:hidden cursor-pointer"
+            onClick={() => setInspectorOpen(false)}
+          />
+          <Inspector
+            pipelineRun={sending_message && streamingPipelineRun ? streamingPipelineRun : selectedPipelineRun}
+            onClose={() => setInspectorOpen(false)}
+          />
+        </>
       )}
 
       {/* Selector Modal */}

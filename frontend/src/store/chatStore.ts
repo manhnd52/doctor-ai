@@ -307,7 +307,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
               ...prev.streamingPipelineRun,
               trace_data: {
                 ...prev.streamingPipelineRun.trace_data,
-                question_type: qType
+                question_type: qType,
+                steps: prev.streamingPipelineRun.trace_data?.steps || []
               }
             } : null
             return {

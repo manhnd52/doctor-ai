@@ -26,7 +26,7 @@ export default function KnowledgeContext({ isOpen, onClose }: DatabaseConnectMen
   if (!isOpen || !activeGraph) return null
 
   return (
-    <div className="fixed right-6 top-16 z-50 w-[380px] max-h-[82vh] flex flex-col rounded-2xl border border-theme bg-panel p-6 shadow-[0_20px_50px_rgba(0,0,0,0.15)] animate-fadeIn overflow-hidden">
+    <div className="fixed right-4 left-4 sm:left-auto sm:right-6 top-16 z-50 max-w-[calc(100vw-2rem)] sm:w-[380px] max-h-[82vh] flex flex-col rounded-2xl border border-theme bg-panel p-6 shadow-[0_20px_50px_rgba(0,0,0,0.15)] animate-fadeIn overflow-hidden">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between pb-3 border-b border-theme shrink-0">
         <div className="flex items-center gap-2">

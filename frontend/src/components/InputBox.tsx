@@ -66,7 +66,7 @@ export default function InputBox({
           <button
             type="button"
             onClick={() => {
-              onStopSendMessage();
+              onStopSendMessage?.();
             }}
             className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-red-500 hover:bg-red-600 text-white transition active:scale-95 cursor-pointer"
             title="Stop generating"

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { X, Layers, Clock, CheckCircle2, ChevronDown, ChevronUp, AlertCircle } from "lucide-react"
-import type { PipelineRun, PipelineStep } from "./MessageItem"
+import type { PipelineRun } from "./MessageItem"
 import { getStepDisplayName } from "../store/chatStore"
 
 interface InspectorProps {
@@ -52,7 +52,7 @@ export default function Inspector({ pipelineRun, onClose }: InspectorProps) {
   }
 
   return (
-    <div className="flex h-full w-[320px] flex-col border-l border-theme bg-panel text-primary select-none sm:w-[360px] md:w-[380px] shrink-0">
+    <div className="fixed right-0 top-0 bottom-0 z-40 flex h-full w-full max-w-[320px] flex-col border-l border-theme bg-panel text-primary select-none sm:max-w-[360px] md:relative md:right-auto md:top-auto md:bottom-auto md:max-w-none md:w-[380px] shrink-0 animate-slideInRight md:animate-none shadow-2xl md:shadow-none">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-theme p-4">
         <div className="flex items-center gap-2">

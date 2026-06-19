@@ -4,10 +4,18 @@ import Sidebar from "../components/Sidebar"
 import { useUIStore } from "../store/uiStore"
 
 export default function MainLayout() {
-  const { isSidebarOpen } = useUIStore()
+  const { isSidebarOpen, setSidebarOpen } = useUIStore()
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-primary font-sans antialiased text-primary">
+      {/* Left Sidebar Backdrop for Mobile */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 backdrop-blur-[2px] md:hidden cursor-pointer"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Left Sidebar */}
       {isSidebarOpen && <Sidebar />}
 

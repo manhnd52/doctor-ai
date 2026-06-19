@@ -131,7 +131,7 @@ export default function KnowledgeGraphSelector() {
         }
 
         return (
-            <div className="flex-grow overflow-y-auto pr-1 space-y-6">
+            <div className="flex-grow overflow-y-auto pr-1 space-y-4 sm:space-y-6">
                 {/* Card Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {graphs.map((graph) => {
@@ -196,7 +196,7 @@ export default function KnowledgeGraphSelector() {
                 </div>
 
                 {/* Actions panel */}
-                <div className="rounded-2xl border border-theme bg-panel p-6 shadow-sm space-y-5">
+                <div className="rounded-2xl border border-theme bg-panel p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-5">
                     <div className="flex flex-col gap-2">
                         <label htmlFor="session-title" className="text-xs font-semibold text-secondary uppercase tracking-wider">
                             Chat Title
@@ -219,7 +219,7 @@ export default function KnowledgeGraphSelector() {
                     <button
                         onClick={handleLaunch}
                         disabled={selectedGraphId === null || launching}
-                        className="w-full bg-accent hover:brightness-110 text-black disabled:opacity-50 disabled:cursor-not-allowed py-3.5 px-6 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 select-none active:scale-[0.99] cursor-pointer shadow-md shadow-accent/5"
+                        className="w-full bg-accent hover:brightness-110 text-black disabled:opacity-50 disabled:cursor-not-allowed py-3 sm:py-3.5 px-6 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 select-none active:scale-[0.99] cursor-pointer shadow-md shadow-accent/5"
                     >
                         {launching ? (
                             <>
@@ -240,10 +240,10 @@ export default function KnowledgeGraphSelector() {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 sm:p-6 select-none overflow-y-auto">
             {/* Modal Box */}
-            <div className="relative w-full max-w-[760px] rounded-3xl border border-theme bg-panel p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex flex-col max-h-[90vh] overflow-hidden animate-fadeIn">
+            <div className="relative w-full max-w-[760px] rounded-3xl border border-theme bg-panel p-5 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex flex-col max-h-[90vh] overflow-hidden animate-fadeIn">
 
                 {/* Modal Header */}
-                <div className="flex items-center justify-between pb-4 border-b border-theme mb-6">
+                <div className="flex items-center justify-between pb-4 border-b border-theme mb-4 sm:mb-6">
                     <div>
                         <h3 className="text-xl font-bold text-primary">Select Knowledge Graph</h3>
                         <p className="text-xs text-secondary mt-0.5">

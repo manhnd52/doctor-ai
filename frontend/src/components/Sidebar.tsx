@@ -1,9 +1,8 @@
 import { useState } from "react"
-import { Plus, Search, MessageSquare, Trash2, Edit3, Check, X } from "lucide-react"
+import { Plus, Search, MessageSquare, Trash2, Edit3, Check, X, Bot } from "lucide-react"
 import { useChatStore } from "../store/chatStore"
 import { useUIStore } from "../store/uiStore"
 import type { ChatSession } from "../types/ChatType"
-import chatbotLogo from "../assets/chatbot-ai.jpeg"
 
 export default function Sidebar() {
   const {
@@ -14,7 +13,7 @@ export default function Sidebar() {
     updateSessionTitle,
   } = useChatStore()
 
-  const { setGraphSelectorOpen } = useUIStore()
+  const { setGraphSelectorOpen, setSidebarOpen } = useUIStore()
 
   const [searchTerm, setSearchTerm] = useState("")
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -44,11 +43,11 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="flex h-full w-[260px] flex-col border-r border-theme bg-panel text-primary select-none sm:w-[280px]">
+    <div className="fixed inset-y-0 left-0 z-40 flex h-full w-[260px] flex-col border-r border-theme bg-panel text-primary select-none sm:w-[280px] md:relative md:inset-auto md:z-0 animate-slideInLeft md:animate-none shadow-2xl md:shadow-none">
       {/* Logo & Branding */}
       <div className="flex items-center gap-3 px-5 py-4 mb-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden shadow-sm">
-          <img src={chatbotLogo} alt="Chatbot Logo" className="h-full w-full object-cover" />
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-sm border bg-accent/10 border-accent/20 text-accent">
+          <Bot className="h-4.5 w-4.5" />
         </div>
         <span className="font-semibold text-sm tracking-[0.18em] text-primary">
           Doctor.ai
@@ -95,7 +94,14 @@ export default function Sidebar() {
               return (
                 <div
                   key={session.id}
-                  onClick={() => !isEditing && selectSession(session.id)}
+                  onClick={() => {
+                    if (!isEditing) {
+                      selectSession(session.id)
+                      if (window.innerWidth < 768) {
+                        setSidebarOpen(false)
+                      }
+                    }
+                  }}
                   className={`group relative flex items-center justify-between rounded-xl p-3 text-sm transition cursor-pointer ${isActive
                     ? "bg-secondary text-primary font-medium"
                     : "text-secondary hover:bg-secondary/60 hover:text-primary"
