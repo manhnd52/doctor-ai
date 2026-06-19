@@ -18,8 +18,7 @@ export default defineConfig({
     }
   },
   server: {
-    port: 3000,
-    host: true,
+    allowedHosts: ['manhnd52.id.vn']
   },
   plugins: [react(), tailwindcss()],
   test: {
