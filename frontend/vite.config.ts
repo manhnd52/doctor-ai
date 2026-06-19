@@ -18,7 +18,7 @@ export default defineConfig({
     }
   },
   server: {
-    allowedHosts: ['manhnd52.id.vn']
+    allowedHosts: ['manhnd52.id.vn', 'doctor-ai.manhnd52.id.vn']
   },
   plugins: [react(), tailwindcss()],
   test: {
